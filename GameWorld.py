@@ -19,6 +19,7 @@ while running:
     screen.fill("blue")
 
     # RENDER YOUR GAME HERE
+    
 
     # flip() the display to put your work on screen
     pygame.display.flip()
