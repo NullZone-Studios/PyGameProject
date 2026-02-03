@@ -1,5 +1,7 @@
 import pygame
 import numpy
+from GameEssentials.GameObject import GameObject
+from typing import Optional
 
 # pygame setup
 pygame.init()
@@ -9,12 +11,24 @@ pygame.display.set_caption("Test Project")
 clock = pygame.time.Clock()
 running = True
 
+gameObjects = list[GameObject]()
+MainCamera: Optional[GameObject] = None
+
+def Update(deltaTime: float):
+    for obj in gameObjects[:]:
+        obj.Update(deltaTime)
+        if obj._destroyed:
+            gameObjects.remove(obj)
+
 while running:
     # poll for events
     # pygame.QUIT event means the user clicked X to close your window
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+
+    # UPDATE GAME
+    Update(clock.get_time())
 
     # fill the screen with a color to wipe away anything from last frame
     screen.fill("blue")
