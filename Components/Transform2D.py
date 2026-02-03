@@ -1,6 +1,6 @@
 from GameObject.Component import Component
-from GameEssentials.Vector2 import Vector2
 from typing import Type, Optional
+from pygame import Vector2
 
 class Transform2D(Component):
     def __init__(self, x: Optional[int] = 0, y: Optional[int] = 0):
