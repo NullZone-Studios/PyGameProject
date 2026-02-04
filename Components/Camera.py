@@ -1,7 +1,7 @@
 import numpy as np
 import pygame as pg
-from GameEssentials.Component import Component
-from Components.Transform import Transform
+from GameEssentials import Component
+from Components import Transform
 
 class CameraRenderType:
     ORTHOGRAPHIC = 0
@@ -51,3 +51,8 @@ class Camera(Component):
             projection[1,3] = -(top+bottom) / (top-bottom)
             projection[2,3] = -(far+near) / (far-near)
             return projection
+    
+    @property
+    def FocalLength(self):
+        fovRadian = np.deg2rad(self.FOV)
+        return 1 / np.tan(fovRadian * .5)

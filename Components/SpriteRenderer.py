@@ -1,9 +1,8 @@
 import pygame
 import numpy as np
 import os
-from GameEssentials.Component import Component
-from Components.Transform import Transform
-from Components.Camera import Camera
+from GameEssentials import Component
+from Components import Transform, Camera
 from typing import Optional
 from pygame import Color
 

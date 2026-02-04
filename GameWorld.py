@@ -1,6 +1,7 @@
 import pygame
 import numpy
-from GameEssentials.GameObject import GameObject
+from Components import Camera, SpriteRenderer
+from GameEssentials import GameObject, InputSystem, ButtonStateBind
 from typing import Optional
 
 # pygame setup
@@ -12,13 +13,65 @@ clock = pygame.time.Clock()
 running = True
 
 gameObjects = list[GameObject]()
-MainCamera: Optional[GameObject] = None
+MainCamera: Optional[Camera] = None
+renderQueue = []
+
+InputSystem.GetInstance().KeyBindings[pygame.K_SPACE] = ButtonStateBind(
+    pressed = lambda _: print("SPACE!"),
+    held = lambda _: print("STILL SPACE!"),
+    released = lambda _: print("NO MORE SPACE")
+)
 
 def Update(deltaTime: float):
     for obj in gameObjects[:]:
         obj.Update(deltaTime)
         if obj._destroyed:
             gameObjects.remove(obj)
+            
+def FindMainCamera():
+    for obj in gameObjects:
+        camera = obj.GetFirstComponentOfType(Camera)
+        if camera:
+            return camera
+    return None
+
+def BuildRenderQueue(camera: Camera):
+    queue = []
+    
+    for obj in gameObjects:
+        renderer = obj.GetFirstComponentOfType(SpriteRenderer)
+        if not renderer:
+            continue
+        data = renderer.GetRenderData(camera)
+        if data:
+            queue.append(data)
+    return queue
+
+def RenderQueue(screen: pygame.Surface, camera: Camera, queue):
+    sw, sh = camera.ScreenWidth, camera.ScreenHeight
+    for item in queue:
+        ndc = item["ndc"]
+        surface: pygame.Surface = item["surface"]
+        depth = max(item["depth"], camera.Near)
+        
+        if depth <= 0:
+            continue
+        if not (-1 <= ndc[0] <= 1 and -1 <= ndc[1] <= 1):
+            continue
+
+        
+        x = (ndc[0]*.5+.5) * sw
+        y = (1 - (ndc[1] * .5+.5)) * sh
+        
+        scale = camera.FocalLength / depth
+        w = max(1, int(surface.get_width() * scale))
+        h = max(1, int(surface.get_height() * scale))
+        
+        shade = min(1.0, 5 / depth)
+        
+        scaled = pygame.transform.scale(surface, (w,h))
+        scaled.set_alpha(int(255 * shade))
+        screen.blit(scaled, (x-w // 2, y-h // 2))
 
 while running:
     # poll for events
@@ -26,15 +79,24 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+            
+    InputSystem.GetInstance().Update()
 
     # UPDATE GAME
-    Update(clock.get_time())
-
+    Update(clock.get_time() / 1000.0)
+    
+    if not MainCamera:
+        MainCamera = FindMainCamera()
+    
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("blue")
+    screen.fill("black")
 
     # RENDER YOUR GAME HERE
-    
+    if MainCamera:
+        renderQueue = BuildRenderQueue(MainCamera)
+        renderQueue.sort(key=lambda r: r["depth"], reverse=True)
+        RenderQueue(screen, MainCamera, renderQueue)
+        
 
     # flip() the display to put your work on screen
     pygame.display.flip()

@@ -1,4 +1,4 @@
-from GameEssentials.Component import Component
+from GameEssentials import Component
 from typing import Type, Optional
 from pygame import Vector3
 import numpy as np

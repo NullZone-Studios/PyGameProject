@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections import defaultdict
 
-from Component import Component
+from GameEssentials import Component
 from typing import Optional, Type, TypeVar, Generic
 from pygame import Vector2
 

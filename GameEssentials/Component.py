@@ -1,9 +1,8 @@
 from typing import Optional, Type
-from GameObject import GameObject
 
 class Component:
     def __init__(self):
-        self.GameObject: GameObject | None = None
+        self.GameObject: GameObject | None = None # type: ignore
         self.Enabled = True
         
     def Enable(self):
