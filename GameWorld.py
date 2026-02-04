@@ -16,12 +16,6 @@ gameObjects = list[GameObject]()
 MainCamera: Optional[Camera] = None
 renderQueue = []
 
-InputSystem.GetInstance().KeyBindings[pygame.K_SPACE] = ButtonStateBind(
-    pressed = lambda _: print("SPACE!"),
-    held = lambda _: print("STILL SPACE!"),
-    released = lambda _: print("NO MORE SPACE")
-)
-
 def Update(deltaTime: float):
     for obj in gameObjects[:]:
         obj.Update(deltaTime)
