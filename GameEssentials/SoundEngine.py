@@ -18,6 +18,7 @@ class SoundEngine:
             raise Exception("SoundEngine is a singleton! Use SoundEngine.GetInstance()")
         SoundEngine.instance = self
         pygame.mixer.init()
+        pygame.mixer.set_num_channels(16)
         
         self.sfx: dict[str, pygame.mixer.Sound] = {}
         self.channels: dict[str, pygame.mixer.Channel] = {
@@ -26,7 +27,7 @@ class SoundEngine:
         }
         
         self.worldChannels = [
-            pygame.mixer.Channel(i) for i in range(2,16)
+            pygame.mixer.Channel(i) for i in range(2, 16)
         ]
         
         self.masterVolume = 1.0
@@ -44,7 +45,7 @@ class SoundEngine:
         self.sfx[name] = pygame.mixer.Sound(path)
         self.applySFXVolume(name)
         
-    def PlaySFX(self, name: str, channel: str = BasicChannels.WORLD):
+    def PlaySFX(self, name: str, channel: str = BasicChannels.PLAYER):
         if name not in self.sfx:
             print(f"[SoundEngine] Missing SFX: {name}")
             return

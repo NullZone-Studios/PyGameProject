@@ -8,7 +8,7 @@ class DirectionalLight(Light):
         if not transform:
             return np.array([0,1,0], dtype=float)
         
-        direction = transform.WorldRitationMatrix @ np.array([0,0,-1])
+        direction = transform.WorldRotationMatrix @ np.array([0,0,-1])
         length = np.linalg.norm(direction)
         if length > 0:
             direction /= length

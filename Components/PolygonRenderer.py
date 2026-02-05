@@ -12,11 +12,11 @@ class PolygonRenderer(Component):
         self.backfaceCulling: bool = backfaceCulling
         
     def GetRenderData(self, camera: Camera, lights: list[Light] = None):
-        transform: Transform = self.GameObject.GetFirstComponentOfType(Transform)
+        transform: Transform = self.GameObject.Transform
         if not transform:
             return None
         
-        cameraTransform: Transform = camera.GameObject.GetFirstComponentOfType(Transform)
+        cameraTransform: Transform = camera.GameObject.Transform
         if not cameraTransform:
             return None
         
@@ -44,14 +44,22 @@ class PolygonRenderer(Component):
         if screenPoints is None:
             return None
         
-        return {
-            "type": "polygon",
-            "points": screenPoints,
-            "depth": sum(depths) / len(depths),
-            "normal": normal,
-            "color": shadeColor,
-            "filled": self.filled
-        }
+        triangles= []
+        for i in range(1, len(screenPoints) -1):
+            triangles.append({
+                "type": "triangle",
+                "points":[
+                    screenPoints[0],
+                    screenPoints[i],
+                    screenPoints[i+1]
+                ],
+                "depth": (depths[0] + depths[i] + depths[i+1]) / 3,
+                "color": shadeColor,
+                "normal": normal,
+                "filled": self.filled
+            })
+        
+        return triangles
     
     def getWorldVertices(self, transform: Transform) -> list[np.ndarray]:
         vertices = []
@@ -102,6 +110,7 @@ class PolygonRenderer(Component):
         for p in worldVertices:
             p4 = np.array([p[0],p[1],p[2],1])
             viewPosition = view @ p4
+            
             depth: int = viewPosition[2]
             
             clip = camera.ProjectionMatrix @ viewPosition

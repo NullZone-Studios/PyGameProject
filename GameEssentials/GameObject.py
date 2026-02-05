@@ -2,6 +2,7 @@ from __future__ import annotations
 from collections import defaultdict
 
 from GameEssentials import Component
+from Components.Transform import Transform
 from typing import Optional, Type, TypeVar, Generic
 from pygame import Vector2
 
@@ -19,6 +20,8 @@ class GameObject:
         self._awoken = False
         self._started = False
         self._destroyed = False
+        self.Transform = Transform()
+        self.AddComponent(self.Transform)
         
         if parent is not None:
             parent.AddChild(self)

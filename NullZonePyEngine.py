@@ -1,14 +1,16 @@
 import pygame
 import numpy
-from Components import Camera, SpriteRenderer
+from Components import Camera, SpriteRenderer, Light
 from GameEssentials import GameObject, InputSystem, ButtonStateBind
 from typing import Optional
+from Builder import GameBuilder
+from Builder import Showcase as Game
 
 # pygame setup
 pygame.init()
-pygame
-screen = pygame.display.set_mode((1280, 720))
-pygame.display.set_caption("Test Project")
+screen = pygame.display.set_mode(Game.RESOLUTION)
+pygame.display.set_icon(Game.ICON)
+pygame.display.set_caption(Game.TITLE)
 clock = pygame.time.Clock()
 running = True
 
@@ -32,12 +34,29 @@ def FindMainCamera():
 def BuildRenderQueue(camera: Camera):
     queue = []
 
+    lights = []
+    def CollectLights(obj: GameObject):
+        for compenent in obj.Components:
+            if isinstance(compenent, Light):
+                lights.append(compenent)
+        for child in obj.Children:
+            CollectLights(child)
     for obj in gameObjects:
+        CollectLights(obj)
+
+    def AddObjectToQueue(obj: GameObject):
         for component in obj.Components:
             if hasattr(component, "GetRenderData"):
-                data = component.GetRenderData(camera)
-                if data:
+                data = component.GetRenderData(camera, lights)
+                if isinstance(data, list):
+                    queue.extend(data)
+                elif data:
                     queue.append(data)
+                    
+        for child in obj.Children:
+            AddObjectToQueue(child)
+    for obj in gameObjects:
+        AddObjectToQueue(obj)
 
     return queue
 
@@ -67,11 +86,16 @@ def RenderQueue(screen: pygame.Surface, camera: Camera, queue):
             scaled = pygame.transform.scale(surface, (w,h))
             scaled.set_alpha(int(255 * shade))
             screen.blit(scaled, (x-w // 2, y-h // 2))
-        elif item["type"] == "polygon":
+        elif item["type"] == "triangle":
             if item["filled"]:
                 pygame.draw.polygon(screen, item["color"], item["points"])
             else:
                 pygame.draw.polygon(screen, item["color"], item["points"], 1)
+
+Game.Build(gameObjects)
+for obj in gameObjects:
+    obj.Awake()
+    obj.Start()
 
 while running:
     # poll for events
@@ -89,7 +113,7 @@ while running:
         MainCamera = FindMainCamera()
     
     # fill the screen with a color to wipe away anything from last frame
-    screen.fill("black")
+    screen.fill(Game.BACKGROUND_COLOR)
 
     # RENDER YOUR GAME HERE
     if MainCamera:
@@ -97,7 +121,6 @@ while running:
         renderQueue.sort(key=lambda r: r["depth"], reverse=True)
         RenderQueue(screen, MainCamera, renderQueue)
         
-
     # flip() the display to put your work on screen
     pygame.display.flip()
 

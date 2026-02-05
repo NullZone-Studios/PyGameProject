@@ -2,7 +2,7 @@ from typing import Optional, Type
 
 class Component:
     def __init__(self):
-        self.GameObject: GameObject | None = None # type: ignore
+        self.GameObject = None # type: ignore
         self.Enabled = True
         
     def Enable(self):

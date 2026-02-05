@@ -82,7 +82,7 @@ class Transform(Component):
         cz,sz = np.cos(rz), np.sin(rz)
         
         Rx = np.array([[1,0,0],[0,cx,-sx],[0,sx,cx]])
-        Ry = np.array([[cy,0,sy],[0,1,0,[-sy,0,cy]]])
+        Ry = np.array([[cy,0,sy],[0,1,0],[-sy,0,cy]])
         Rz = np.array([[cz,-sz,0],[sz,cz,0],[0,0,1]])
         
         return Rz @ Ry @ Rx
@@ -91,3 +91,29 @@ class Transform(Component):
     def WorldPosition(self) -> Vector3:
         self.ComputeWorldMatrix()
         return Vector3(*self._worldMatrix[:3,3])
+    
+    @property
+    def WorldRotationMatrix(self):
+        rx, ry, rz = self.Rotation.x, self.Rotation.y, self.Rotation.z
+
+        Rx = np.array([[1, 0, 0],
+                   [0, np.cos(rx), -np.sin(rx)],
+                   [0, np.sin(rx), np.cos(rx)]])
+
+        Ry = np.array([[np.cos(ry), 0, np.sin(ry)],
+                   [0, 1, 0],
+                   [-np.sin(ry), 0, np.cos(ry)]])
+
+        Rz = np.array([[np.cos(rz), -np.sin(rz), 0],
+                   [np.sin(rz),  np.cos(rz), 0],
+                   [0, 0, 1]])
+
+        localRotation = Rz @ Ry @ Rx
+
+        # If has parent, multiply by parent's world rotation
+        if self.GameObject and self.GameObject.Parent:
+            parentTransform = self.GameObject.Parent.GetFirstComponentOfType(Transform)
+            if parentTransform:
+                return parentTransform.WorldRotationMatrix @ localRotation
+
+        return localRotation
