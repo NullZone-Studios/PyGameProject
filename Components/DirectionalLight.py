@@ -14,6 +14,8 @@ class DirectionalLight(Light):
             direction /= length
         return direction
     
-    def GetDiffuseFactor(self, worldPosition, normal):
+    def GetDiffuseFactor(self, worldPosition, normal) -> float:
+        if not self.Enabled:
+            return 0
         direction = self.GetDirection()
         return max(np.dot(normal, -direction), 0) * self.intensity

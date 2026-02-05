@@ -8,9 +8,12 @@ class PointLight(Light):
         self.range = range
         
     def GetDiffuseFactor(self, worldPosition, normal) -> float:
+        if not self.Enabled:
+            return 0
+        
         transform: Transform = self.GameObject.GetFirstComponentOfType(Transform)
         if not transform:
-            return
+            return 0
         
         lightPosition = np.array([
             transform.WorldPosition.x,

@@ -34,10 +34,10 @@ class PolygonRenderer(Component):
                 shadeR += self.color.r * light.color.r / 255 * factor
                 shadeG += self.color.g * light.color.g / 255 * factor
                 shadeB += self.color.b * light.color.b / 255 * factor
-
-        shadeR = min(int(shadeR), 255)
-        shadeG = min(int(shadeG), 255)
-        shadeB = min(int(shadeB), 255)
+        
+        shadeR = max(0, min(int(shadeR), 255))
+        shadeG = max(0, min(int(shadeG), 255))
+        shadeB = max(0, min(int(shadeB), 255))
         shadeColor = pygame.Color(shadeR, shadeG, shadeB)
 
         screenPoints, depths = self.projectVertices(worldVertices, camera)
@@ -85,10 +85,14 @@ class PolygonRenderer(Component):
         if cameraLength == 0:
             return True, normal
         faceToCamera /= cameraLength
-        if np.dot (normal, faceToCamera) < 0:
+        
+        dot = np.dot(normal, faceToCamera)
+        cull = dot <= 0
+        
+        if dot < 0:
             normal = -normal
         
-        return np.dot(normal, faceToCamera) <= 0, normal
+        return cull, normal
     
     def projectVertices(self, worldVertices: list[np.ndarray], camera: Camera):
         screenPoints: list[pygame.Vector2] = []
