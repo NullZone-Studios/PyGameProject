@@ -31,41 +31,47 @@ def FindMainCamera():
 
 def BuildRenderQueue(camera: Camera):
     queue = []
-    
+
     for obj in gameObjects:
-        renderer = obj.GetFirstComponentOfType(SpriteRenderer)
-        if not renderer:
-            continue
-        data = renderer.GetRenderData(camera)
-        if data:
-            queue.append(data)
+        for component in obj.Components:
+            if hasattr(component, "GetRenderData"):
+                data = component.GetRenderData(camera)
+                if data:
+                    queue.append(data)
+
     return queue
 
 def RenderQueue(screen: pygame.Surface, camera: Camera, queue):
     sw, sh = camera.ScreenWidth, camera.ScreenHeight
     for item in queue:
-        ndc = item["ndc"]
-        surface: pygame.Surface = item["surface"]
-        depth = max(item["depth"], camera.Near)
+        if item["type"] == "sprite":
+            ndc = item["ndc"]
+            surface: pygame.Surface = item["surface"]
+            depth = max(item["depth"], camera.Near)
         
-        if depth <= 0:
-            continue
-        if not (-1 <= ndc[0] <= 1 and -1 <= ndc[1] <= 1):
-            continue
+            if depth <= 0:
+                continue
+            if not (-1 <= ndc[0] <= 1 and -1 <= ndc[1] <= 1):
+                continue
 
         
-        x = (ndc[0]*.5+.5) * sw
-        y = (1 - (ndc[1] * .5+.5)) * sh
+            x = (ndc[0]*.5+.5) * sw
+            y = (1 - (ndc[1] * .5+.5)) * sh
         
-        scale = camera.FocalLength / depth
-        w = max(1, int(surface.get_width() * scale))
-        h = max(1, int(surface.get_height() * scale))
+            scale = camera.FocalLength / depth
+            w = max(1, int(surface.get_width() * scale))
+            h = max(1, int(surface.get_height() * scale))
         
-        shade = min(1.0, 5 / depth)
+            shade = min(1.0, 5 / depth)
         
-        scaled = pygame.transform.scale(surface, (w,h))
-        scaled.set_alpha(int(255 * shade))
-        screen.blit(scaled, (x-w // 2, y-h // 2))
+            scaled = pygame.transform.scale(surface, (w,h))
+            scaled.set_alpha(int(255 * shade))
+            screen.blit(scaled, (x-w // 2, y-h // 2))
+        elif item["type"] == "polygon":
+            if item["filled"]:
+                pygame.draw.polygon(screen, item["color"], item["points"])
+            else:
+                pygame.draw.polygon(screen, item["color"], item["points"], 1)
 
 while running:
     # poll for events

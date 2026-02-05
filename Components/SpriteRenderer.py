@@ -30,6 +30,7 @@ class SpriteRenderer(Component):
         projection /= projection[3]
         
         return {
+            "type": "sprite",
             "depth": cameraPosition[2],
             "ndc": projection,
             "surface": self.surface

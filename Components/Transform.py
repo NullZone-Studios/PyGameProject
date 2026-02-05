@@ -75,6 +75,18 @@ class Transform(Component):
         self._worldMatrix = localMatrix
         return self._worldMatrix
     
+    def ComputeRotationMatrix(self):
+        rx,ry,rz = self.Rotation
+        cx,sx = np.cos(rx), np.sin(rx)
+        cy,sy = np.cos(ry), np.sin(ry)
+        cz,sz = np.cos(rz), np.sin(rz)
+        
+        Rx = np.array([[1,0,0],[0,cx,-sx],[0,sx,cx]])
+        Ry = np.array([[cy,0,sy],[0,1,0,[-sy,0,cy]]])
+        Rz = np.array([[cz,-sz,0],[sz,cz,0],[0,0,1]])
+        
+        return Rz @ Ry @ Rx
+    
     @property
     def WorldPosition(self) -> Vector3:
         self.ComputeWorldMatrix()
