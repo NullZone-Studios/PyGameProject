@@ -40,25 +40,25 @@ class PolygonRenderer(Component):
         shadeB = max(0, min(int(shadeB), 255))
         shadeColor = pygame.Color(shadeR, shadeG, shadeB)
 
-        screenPoints, depths = self.projectVertices(worldVertices, camera)
-        if screenPoints is None:
-            return None
+        viewVerticies = self.toViewSpace(worldVertices, camera)
+        triangles = []
+        near = camera.Near
         
-        triangles= []
-        for i in range(1, len(screenPoints) -1):
-            triangles.append({
-                "type": "triangle",
-                "points":[
-                    screenPoints[0],
-                    screenPoints[i],
-                    screenPoints[i+1]
-                ],
-                "depth": (depths[0] + depths[i] + depths[i+1]) / 3,
-                "color": shadeColor,
-                "normal": normal,
-                "filled": self.filled
-            })
-        
+        for i in range(1,len(viewVerticies) -1):
+            baseTriangle = [viewVerticies[0], viewVerticies[i], viewVerticies[i+1]]
+            clipped = self.clipTriangleNear(baseTriangle, camera.Near)
+            
+            for triangle in clipped:
+                points, depths = self.projectTriangle(triangle, camera)
+                triangles.append({
+                    "type": "triangle",
+                    "points": points,
+                    "depth": sum(depths) / len(depths),
+                    "color": shadeColor,
+                    "normal": normal,
+                    "filled": self.filled
+                })
+
         return triangles
     
     def getWorldVertices(self, transform: Transform) -> list[np.ndarray]:
@@ -102,27 +102,64 @@ class PolygonRenderer(Component):
         
         return cull, normal
     
-    def projectVertices(self, worldVertices: list[np.ndarray], camera: Camera):
-        screenPoints: list[pygame.Vector2] = []
-        depths: list[float] = []
+    def toViewSpace(self, worldVerticies: list[np.ndarray] ,camera: Camera):
         view = camera.ViewMatrix
+        viewVerticies = []
+        for p in worldVerticies:
+            p4 = np.array([p[0], p[1],p[2],1.0])
+            v = view @ p4
+            viewVerticies.append(v)
+        return viewVerticies
+    
+    def clipTriangleNear(self, triangle: list, near: float) -> list:
+        inside = []
+        outside = []
+
+        for v in triangle:
+            if -v[2] >= near:  # note: -v[2] because view Z is negative in front
+                inside.append(v)
+            else:
+                outside.append(v)
+
+        if len(inside) == 0:
+            return []
+
+        def intersect(v1, v2):
+            t = (near + v1[2]) / (v1[2] - v2[2])
+            return v1 + t * (v2 - v1)
+
+        # all vertices inside, return original
+        if len(inside) == 3:
+            return [triangle]
+
+        # one vertex inside
+        if len(inside) == 1:
+            v0 = inside[0]
+            v1 = intersect(v0, outside[0])
+            v2 = intersect(v0, outside[1])
+            return [[v0, v1, v2]]
+
+        # two vertices inside
+        if len(inside) == 2:
+            v0, v1 = inside
+            v2 = intersect(v0, outside[0])
+            v3 = intersect(v1, outside[0])
+            return [[v0, v1, v3], [v0, v3, v2]]
+
+        return []
+
+            
+    def projectTriangle(self, triangle: list, camera: Camera):
+        points = []
+        depths = []
         
-        for p in worldVertices:
-            p4 = np.array([p[0],p[1],p[2],1])
-            viewPosition = view @ p4
-            
-            depth: int = viewPosition[2]
-            
-            clip = camera.ProjectionMatrix @ viewPosition
-            if clip[3] <= 0:
-                return None, None
-            
+        for v in triangle:
+            clip = camera.ProjectionMatrix @ v
             clip /= clip[3]
             
             x = (clip[0] * .5 + .5) * camera.ScreenWidth
             y = (1 - (clip[1] * .5 + .5)) * camera.ScreenHeight
             
-            screenPoints.append(pygame.Vector2(x,y))
-            depths.append(depth)
-            
-        return screenPoints, depths
+            points.append(pygame.Vector2(x,y))
+            depths.append(-v[2])
+        return points, depths

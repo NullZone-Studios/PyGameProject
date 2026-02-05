@@ -23,7 +23,7 @@ class Showcase(GameBuilder):
     
     def Build(gameObjects: list[GameObject]):
         
-        InputSystem.GetInstance().KeyBindings[pygame.K_q] = ButtonStateBind(
+        InputSystem.GetInstance().KeyBindings[pygame.K_ESCAPE] = ButtonStateBind(
             pressed= lambda _: pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
         )
         
