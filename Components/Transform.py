@@ -121,9 +121,23 @@ class Transform(Component):
     @property
     def Forward(self) -> Vector3:
         rotation = self.WorldRotationMatrix
-        return Vector3(rotation[0,2], rotation[1,2], rotation[2,2])
+        f = Vector3(rotation[0,2], rotation[1,2], rotation[2,2])
+        if f.length() != 0:
+            f.normalize_ip()
+        return f
     
     @property
     def Right(self) -> Vector3:
         rotation = self.WorldRotationMatrix
-        return Vector3(rotation[0,0], rotation[1,0], rotation[2,0])
+        r = Vector3(rotation[0,0], rotation[1,0], rotation[2,0])
+        if r.length() != 0:
+            r.normalize_ip()
+        return r
+    
+    @property
+    def Up(self) -> Vector3:
+        # IMPORTANT: Right × Forward (not the other way around)
+        u = self.Right.cross(self.Forward)
+        if u.length() != 0:
+            u.normalize_ip()
+        return u

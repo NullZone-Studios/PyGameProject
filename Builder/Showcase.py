@@ -122,9 +122,9 @@ class Showcase(GameBuilder):
         ))
         
         spriteObject = GameObject("Sprite1", "Sprite")
-        spriteObject.Transform.Translate(0,0,0)
+        spriteObject.Transform.Translate(-5,0,-5)
         spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))
-        spriteObject.AddComponent(AudioSource("meow", "src/sound/meow.mp3"))
+        spriteObject.AddComponent(AudioSource("meow", "src/sound/purr.wav"))
         spriteObject.AddComponent(Cat())
         spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         gameObjects.append(spriteObject)
