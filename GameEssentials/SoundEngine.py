@@ -1,4 +1,7 @@
 import pygame
+import numpy as np
+from Components.transform import Transform
+from typing import Optional
 
 class BasicChannels:
     UI = "UI"
@@ -17,7 +20,9 @@ class SoundEngine:
         if SoundEngine.instance is not None:
             raise Exception("SoundEngine is a singleton! Use SoundEngine.GetInstance()")
         SoundEngine.instance = self
-        pygame.mixer.init()
+        pygame.mixer.quit()  # optional safety
+        pygame.mixer.init(frequency=48000, size=-16, channels=2)
+
         pygame.mixer.set_num_channels(16)
         
         self.sfx: dict[str, pygame.mixer.Sound] = {}
@@ -36,13 +41,20 @@ class SoundEngine:
         
         self.maxDistance = 1200.0
         self.maxPanDistance = 600.0
-        self.listenerPosition: pygame.Vector3 = pygame.Vector3(0,0,0)
+        self.listenerTransform: Optional[Transform] = None
         
-    def SetListenerPosition(self, position: pygame.Vector3):
-        self.listenerPosition = position
+    def SetListenerTransform(self, listenerTransform: Transform):
+        self.listenerTransform = listenerTransform
         
     def LoadSFX(self, name:str, path:str):
-        self.sfx[name] = pygame.mixer.Sound(path)
+        sound = pygame.mixer.Sound(path)
+        
+        soundArray = pygame.sndarray.array(sound)
+        if len(soundArray.shape) == 1:
+            stereoArray = np.stack([soundArray, soundArray], axis=1)
+            sound = pygame.sndarray.make_sound(stereoArray.astype(np.int16))
+        
+        self.sfx[name] = sound
         self.applySFXVolume(name)
         
     def PlaySFX(self, name: str, channel: str = BasicChannels.PLAYER):
@@ -59,13 +71,14 @@ class SoundEngine:
     def PlaySFX3D(self, name:str, position: pygame.Vector3):
         if name not in self.sfx:
             print(f"[SoundEngine] Missing SFX: {name}")
-            return
+            return None
         channel: pygame.mixer.Channel = self.getFreeChannel()
         if channel is None:
-            return
+            return None
         left,right = self.compute3D(position)
         channel.set_volume(left, right)
         channel.play(self.sfx[name])
+        return channel
         
     def PlaySFX3DLoop(self, name: str, position: pygame.Vector3):
         if name not in self.sfx:
@@ -80,22 +93,29 @@ class SoundEngine:
         return channel
         
     def compute3D(self, position: pygame.Vector3):
-        lx, ly, lz = self.listenerPosition
-        sx, sy, sz = position
-        
-        dx = sx-lx
-        dy = sy-ly
-        dz = sz-lz
-        
-        distance = (dx**2 + dy**2 + dz**2)**.5
-        volume = max(0, 1 - (distance / self.maxDistance))
+        if self.listenerTransform is None:
+            return self.masterVolume * self.sfxVolume, self.masterVolume * self.sfxVolume
+    
+        listenerPos = self.listenerTransform.WorldPosition
+        listenerRight = self.listenerTransform.Right
+        listenerForward = self.listenerTransform.Forward
+    
+        toSound = position - listenerPos
+        distance = toSound.magnitude()
+        direction = toSound.normalize() if distance != 0 else pygame.Vector3(0,0,1)
+    
+        # Volume falloff (inverse square style)
+        volume = 0 if distance >= self.maxDistance else (1 - (distance / self.maxDistance)**2)
         volume *= self.masterVolume * self.sfxVolume
-        
-        pan = max(-1, min(1,dx/self.maxPanDistance))
-        
-        left = volume * (1.0 - pan) * .5
-        right = volume * (1.0 + pan) * .5
+    
+        # Stereo panning
+        pan = max(-1, min(1, listenerRight.dot(direction)))
+        left = volume * (1 - pan)/2
+        right = volume * (1 + pan)/2
+    
         return left, right
+
+
     
     def getFreeChannel(self):
         for ch in self.worldChannels:

@@ -1,7 +1,9 @@
 import pygame
 import numpy as np
 from GameEssentials import Component
-from Components import Transform, Camera, Light
+from Components.transform import Transform
+from Components.light import Light
+from Components.camera import Camera
 
 class PolygonRenderer(Component):
     def __init__(self, vertices: list[np.ndarray], color: pygame.Color = pygame.Color(255,255,255), filled: bool = True, backfaceCulling: bool = True):

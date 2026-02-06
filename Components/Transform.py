@@ -117,3 +117,13 @@ class Transform(Component):
                 return parentTransform.WorldRotationMatrix @ localRotation
 
         return localRotation
+    
+    @property
+    def Forward(self) -> Vector3:
+        rotation = self.WorldRotationMatrix
+        return Vector3(rotation[0,2], rotation[1,2], rotation[2,2])
+    
+    @property
+    def Right(self) -> Vector3:
+        rotation = self.WorldRotationMatrix
+        return Vector3(rotation[0,0], rotation[1,0], rotation[2,0])

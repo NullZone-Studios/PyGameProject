@@ -1,7 +1,9 @@
-from .Rotator import Rotator
-from .Move import Move
+from .rotator import Rotator
+from .move import Move
+from .cat import Cat
 
 __all__=[
     "Rotator",
-    "Move"
+    "Move",
+    "Cat"
 ]

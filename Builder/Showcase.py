@@ -1,4 +1,4 @@
-from GameEssentials import GameObject, InputSystem, ButtonStateBind
+from GameEssentials import GameObject, InputSystem, ButtonStateBind, SoundEngine
 from Components import (
     Transform,
     Camera,
@@ -12,8 +12,7 @@ from Components import (
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move
-
+from Builder.ShowcaseScripts import Rotator, Move, Cat
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(100,100,100)
@@ -21,8 +20,7 @@ class Showcase(GameBuilder):
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
     
-    def Build(gameObjects: list[GameObject]):
-        
+    def Build(self, gameObjects: list[GameObject]):
         InputSystem.GetInstance().KeyBindings[pygame.K_ESCAPE] = ButtonStateBind(
             pressed= lambda _: pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
         )
@@ -126,5 +124,7 @@ class Showcase(GameBuilder):
         spriteObject = GameObject("Sprite1", "Sprite")
         spriteObject.Transform.Translate(0,0,0)
         spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))
+        spriteObject.AddComponent(AudioSource("meow", "src/sound/meow.mp3"))
+        spriteObject.AddComponent(Cat())
         spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         gameObjects.append(spriteObject)

@@ -1,8 +1,8 @@
-from .Component import Component
-from .GameObject import GameObject
-from .InputSystem import InputSystem
-from .InputSystem import ButtonStateBind
-from .SoundEngine import SoundEngine
+from .component import Component
+from .gameObject import GameObject
+from .inputSystem import InputSystem
+from .inputSystem import ButtonStateBind
+from .soundEngine import SoundEngine
 
 __all__=[
     "Component",

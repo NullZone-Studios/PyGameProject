@@ -1,5 +1,5 @@
-from .GameBuilder import GameBuilder
-from .Showcase import Showcase
+from .gameBuilder import GameBuilder
+from .showcase import Showcase
 
 _all__ = [
     "GameBuilder",

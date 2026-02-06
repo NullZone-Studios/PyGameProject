@@ -1,5 +1,6 @@
 from typing import Optional
 from GameEssentials import GameObject
+from Engine import Engine
 import pygame
 
 class GameBuilder:
@@ -11,5 +12,5 @@ class GameBuilder:
     def Build(self, gameObjects: list[GameObject]):
         pass
     
-    def SetBackgroundColor(self, color: pygame.Color):
-        self.backgroundColor = color
+    def Start(self):
+        Engine.Run(self)

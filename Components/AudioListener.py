@@ -1,12 +1,14 @@
-from GameEssentials import Component, SoundEngine
-from Components import Transform
+from GameEssentials.component import Component
+from GameEssentials.soundEngine import SoundEngine
+from Components.transform import Transform
 
 class AudioListener(Component):
+    
+    def Start(self):
+        SoundEngine.GetInstance().SetListenerTransform(self.GameObject.Transform)
+    
     def Update(self, deltaTime):
-        transform: Transform = self.GameObject.GetFirstComponentOfType(Transform)
+        transform: Transform = self.GameObject.Transform
         if not transform:
             return
-        
-        position = transform.WorldPosition
-        SoundEngine.GetInstance().SetListenerPosition(position)
         

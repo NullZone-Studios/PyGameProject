@@ -1,7 +1,7 @@
 import pygame
 import numpy as np
 from GameEssentials import Component
-from Components import Transform
+from Components.transform import Transform
 
 class Light(Component):
     def __init__(self, color: pygame.Color = pygame.Color(255,255,255), intensity: float = 1.0):

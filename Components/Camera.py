@@ -1,7 +1,7 @@
 import numpy as np
 import pygame as pg
 from GameEssentials import Component
-from Components import Transform
+from Components.transform import Transform
 
 class CameraRenderType:
     ORTHOGRAPHIC = 0

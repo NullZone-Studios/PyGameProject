@@ -1,4 +1,5 @@
-from Components import Light, Transform
+from Components.light import Light
+from Components.transform import Transform
 import pygame
 import numpy as np
 

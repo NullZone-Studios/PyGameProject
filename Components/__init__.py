@@ -1,15 +1,15 @@
-from .Camera import Camera
-from .Camera import CameraRenderType
-from .SpriteRenderer import SpriteRenderer
-from .Transform import Transform
-from .SpriteRenderer import SpriteRenderer
-from .PolygonRenderer import PolygonRenderer
-from .Light import Light
-from .DirectionalLight import DirectionalLight
-from .PointLight import PointLight
-from .AudioListener import AudioListener
-from .AudioSource import AudioSource
-from .Script import Script
+from .camera import Camera
+from .camera import CameraRenderType
+from .spriteRenderer import SpriteRenderer
+from .transform import Transform
+from .spriteRenderer import SpriteRenderer
+from .polygonRenderer import PolygonRenderer
+from .light import Light
+from .directionalLight import DirectionalLight
+from .pointLight import PointLight
+from .audioListener import AudioListener
+from .audioSource import AudioSource
+from .script import Script
 
 
 __all__=[

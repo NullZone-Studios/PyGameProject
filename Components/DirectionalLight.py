@@ -1,6 +1,7 @@
 import pygame
 import numpy as np
-from Components import Light, Transform
+from Components.light import Light
+from Components.transform import Transform
 
 class DirectionalLight(Light):
     def GetDirection(self):

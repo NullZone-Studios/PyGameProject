@@ -1,8 +1,8 @@
 from __future__ import annotations
 from collections import defaultdict
 
-from GameEssentials import Component
-from Components.Transform import Transform
+from .component import Component
+from Components.transform import Transform
 from typing import Optional, Type, TypeVar, Generic
 from pygame import Vector2
 
