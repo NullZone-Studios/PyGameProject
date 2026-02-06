@@ -19,7 +19,7 @@ class Camera(Component):
     
     @property
     def ViewMatrix(self):
-        transform = self.GameObject.Transform
+        transform: Transform = self.GameObject.Transform
         if not transform:
             return np.identity(4)
         worldMatrix = transform.ComputeWorldMatrix()

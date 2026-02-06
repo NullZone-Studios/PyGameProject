@@ -16,7 +16,7 @@ from Builder.ShowcaseScripts import Rotator, Move
 
 
 class Showcase(GameBuilder):
-    BACKGROUND_COLOR = pygame.Color(255,255,255)
+    BACKGROUND_COLOR = pygame.Color(100,100,100)
     TITLE = "Showcase "
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
@@ -122,3 +122,9 @@ class Showcase(GameBuilder):
             ],
             color=c
         ))
+        
+        spriteObject = GameObject("Sprite1", "Sprite")
+        spriteObject.Transform.Translate(0,0,0)
+        spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))
+        spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
+        gameObjects.append(spriteObject)

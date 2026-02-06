@@ -66,26 +66,35 @@ def RenderQueue(screen: pygame.Surface, camera: Camera, queue):
         if item["type"] == "sprite":
             ndc = item["ndc"]
             surface: pygame.Surface = item["surface"]
-            depth = max(item["depth"], camera.Near)
-        
-            if depth <= 0:
+            color: pygame.Color = item["color"]
+            depth = item["depth"]
+
+            # Skip if behind camera
+            if depth <= camera.Near:
                 continue
+            
+            # Skip if outside NDC
             if not (-1 <= ndc[0] <= 1 and -1 <= ndc[1] <= 1):
                 continue
 
-        
-            x = (ndc[0]*.5+.5) * sw
-            y = (1 - (ndc[1] * .5+.5)) * sh
-        
+            # --- NDC → screen coordinates ---
+            x = (ndc[0] * 0.5 + 0.5) * sw
+            y = (1 - (ndc[1] * 0.5 + 0.5)) * sh
+
+            # --- Perspective scale (like polygons) ---
             scale = camera.FocalLength / depth
-            w = max(1, int(surface.get_width() * scale))
-            h = max(1, int(surface.get_height() * scale))
-        
-            shade = min(1.0, 5 / depth)
-        
-            scaled = pygame.transform.scale(surface, (w,h))
-            scaled.set_alpha(int(255 * shade))
-            screen.blit(scaled, (x-w // 2, y-h // 2))
+            w = item["width"]
+            h = item["height"]
+
+            # --- Apply lighting tint ---
+            tinted = surface.copy()
+            tinted.fill(color, special_flags=pygame.BLEND_RGBA_MULT)
+
+            # --- Scale the sprite with perspective ---
+            scaled = pygame.transform.scale(tinted, (w, h))
+
+            # --- Center on screen coordinates ---
+            screen.blit(scaled, (x - w // 2, y - h // 2))
         elif item["type"] == "triangle":
             if item["filled"]:
                 pygame.draw.polygon(screen, item["color"], item["points"])
