@@ -9,6 +9,7 @@ from Components import (
     PolygonRenderer,
     SpriteRenderer
 )
+from Components.UI import Canvas, Label, Button
 from Builder import GameBuilder
 import pygame
 import numpy as np

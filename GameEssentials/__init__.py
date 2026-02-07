@@ -8,6 +8,6 @@ __all__=[
     "Component",
     "GameObject",
     "InputSystem",
-    "ButtonStateBind"
+    "ButtonStateBind",
     "SoundEngine"
 ]

@@ -28,7 +28,7 @@ class GameObject:
 
 # ---------- Children ------------
 
-    def AddChild(self, child: "GameObject"):
+    def AddChild(self, child: "GameObject") -> "GameObject":
         if child.Parent is not None:
             child.Parent.RemoveChild(child)
         
@@ -44,6 +44,7 @@ class GameObject:
         
         child.Parent = self
         self.Children.append(child)
+        return child
         
     def RemoveChild(self, child: "GameObject"):
         if child in self.Children:
@@ -58,7 +59,7 @@ class GameObject:
     
 # ----------- Components -----------
     
-    def AddComponent(self, component: Component):
+    def AddComponent(self, component: Component) -> Component:
         component.GameObject = self
         self.Components.append(component)
         self._componentLookup[type(component)].append(component)
@@ -71,6 +72,8 @@ class GameObject:
             
         if self.Enabled:
             component.OnEnable()
+            
+        return component
     
     def RemoveComponent(self, component: Component):
         component_type = type(component)
