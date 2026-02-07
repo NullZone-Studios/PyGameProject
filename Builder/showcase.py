@@ -9,7 +9,7 @@ from Components import (
     PolygonRenderer,
     SpriteRenderer
 )
-from Components.UI import Canvas, Label, Button
+from Components.UI import Canvas, UIRectangle
 from Builder import GameBuilder
 import pygame
 import numpy as np
@@ -129,3 +129,9 @@ class Showcase(GameBuilder):
         spriteObject.AddComponent(Cat())
         spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         gameObjects.append(spriteObject)
+        
+        overlayObject = GameObject("Overlay", "UI")
+        overlayObject.AddComponent(Canvas())
+        overlayRectangleObject = overlayObject.AddChild(GameObject("Rectangle", "UI"))
+        overlayRectangleObject.AddComponent(UIRectangle())
+        gameObjects.append(overlayObject)
