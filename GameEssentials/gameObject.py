@@ -9,7 +9,7 @@ from pygame import Vector2
 T = TypeVar("T", bound=Component)
 
 class GameObject:
-    def __init__(self, name: str, tag: str, parent: Optional["GameObject"] = None):
+    def __init__(self, name: str, tag: str = "None", parent: Optional["GameObject"] = None):
         self.Name = name
         self.Tag = tag
         self.Parent: Optional[GameObject] = None
@@ -93,6 +93,9 @@ class GameObject:
     def GetFirstComponentOfType(self, type: Type[T]) -> Optional[T]:
         lst = self._componentLookup.get(type)
         return lst[0] if lst else None
+    
+    def GetComponent(self, type: Type[T]) -> Optional[T]:
+        return self.GetFirstComponentOfType(type)
     
     def GetAllComponentsOfType(self, type: Type[T]) -> list[T]:
         return list(self._componentLookup.get(type, []))

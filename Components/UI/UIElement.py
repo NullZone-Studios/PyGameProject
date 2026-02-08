@@ -12,15 +12,32 @@ class Element(Component):
         self.layer: int = 0
 
     def resolve_rect(self, canvas, camera: Camera) -> pygame.Rect:
-        if canvas.renderMode != 0:
+        if not canvas.isScreenSpace:
             return None
         
         sw, sh = camera.ScreenWidth, camera.ScreenHeight
 
-        x = sw * self.anchor.x + self.position.x
-        y = sh * self.anchor.y + self.position.y
+        baseX = sw * self.anchor.x
+        baseY = sh * self.anchor.y
+
+        uiOffset = self.getUIOffset()
+
+        x = baseX + uiOffset.x
+        y = baseY + uiOffset.y
 
         x -= self.size.x * self.anchor.x
         y -= self.size.y * self.anchor.y
 
         return pygame.Rect(x, y, self.size.x, self.size.y)
+    
+    def getUIOffset(self):
+        offset = pygame.Vector2(0,0)
+        obj = self.GameObject
+        
+        while obj:
+            element = obj.GetComponent(Element)
+            if element:
+                offset += element.position
+            obj = obj.Parent
+        
+        return offset

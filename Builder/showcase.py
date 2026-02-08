@@ -9,7 +9,7 @@ from Components import (
     PolygonRenderer,
     SpriteRenderer
 )
-from Components.UI import Canvas, UIRectangle
+from Components.UI import Canvas, Container, UIRectangle, Style
 from Builder import GameBuilder
 import pygame
 import numpy as np
@@ -132,6 +132,18 @@ class Showcase(GameBuilder):
         
         overlayObject = GameObject("Overlay", "UI")
         overlayObject.AddComponent(Canvas())
-        overlayRectangleObject = overlayObject.AddChild(GameObject("Rectangle", "UI"))
-        overlayRectangleObject.AddComponent(UIRectangle())
+        panel = overlayObject.AddChild(GameObject("Panel", "UIContainer"))
+        panelContainer = panel.AddComponent(Container(layout=Container.LayoutDirection.HORIZONTAL, spacing=10))
+
+        style1 = Style(
+            borderWidth=2,
+            borderColor=pygame.Color("black")
+        )
+
+        btn1 = panel.AddChild(GameObject("Button1"))
+        btn1.AddComponent(UIRectangle(style1))
+
+        btn2 = panel.AddChild(GameObject("Button2"))
+        btn2.AddComponent(UIRectangle(style1))
         gameObjects.append(overlayObject)
+
