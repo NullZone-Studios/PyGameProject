@@ -28,7 +28,7 @@ class GameObject:
 
 # ---------- Children ------------
 
-    def AddChild(self, child: "GameObject"):
+    def AddChild(self, child: "GameObject") -> "GameObject":
         if child.Parent is not None:
             child.Parent.RemoveChild(child)
         
@@ -45,6 +45,8 @@ class GameObject:
         child.Parent = self
         self.Children.append(child)
         
+        return child
+        
     def RemoveChild(self, child: "GameObject"):
         if child in self.Children:
             child.Parent = None
@@ -58,7 +60,7 @@ class GameObject:
     
 # ----------- Components -----------
     
-    def AddComponent(self, component: Component):
+    def AddComponent(self, component: Component) -> Component:
         component.GameObject = self
         self.Components.append(component)
         self._componentLookup[type(component)].append(component)
@@ -71,6 +73,8 @@ class GameObject:
             
         if self.Enabled:
             component.OnEnable()
+        
+        return component
     
     def RemoveComponent(self, component: Component):
         component_type = type(component)
@@ -90,6 +94,9 @@ class GameObject:
     def GetFirstComponentOfType(self, type: Type[T]) -> Optional[T]:
         lst = self._componentLookup.get(type)
         return lst[0] if lst else None
+    
+    def GetComponent(self, type: Type[T]) -> Optional[T]:
+        return self.GetFirstComponentOfType(type)
     
     def GetAllComponentsOfType(self, type: Type[T]) -> list[T]:
         return list(self._componentLookup.get(type, []))
