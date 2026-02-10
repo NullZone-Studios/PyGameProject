@@ -8,12 +8,14 @@ from Components import (
     AudioListener,
     PolygonRenderer,
     SpriteRenderer,
-    Face
+    Face,
+    DebugColliderRenderer
 )
 from Builder import GameBuilder
 import pygame
 import numpy as np
 from Builder.ShowcaseScripts import Rotator, Move, Cat
+from Builder.ShowcaseScripts import CollisionLogger
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color("blue")
@@ -29,6 +31,8 @@ class Showcase(GameBuilder):
         # ---------- CAMERA ----------
         cameraObject = GameObject("MainCamera", "Camera")
         cameraObject.AddComponent(Move())
+        cameraObject.AddComponent(CollisionLogger(pygame.Vector3(1.5, 1.5, 1.5), "Camera"))
+        cameraObject.AddComponent(DebugColliderRenderer())
         cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(AudioListener())
         cameraObject.AddComponent(PointLight(pygame.Color("green"), 1))
@@ -45,6 +49,8 @@ class Showcase(GameBuilder):
         cube = GameObject("Cube", "Geometry")
         cube.Transform.Position = pygame.Vector3(5,0,-5)
         cube.AddComponent(Rotator())
+        cube.AddComponent(CollisionLogger(pygame.Vector3(2, 2, 2), "Cube"))
+        cube.AddComponent(DebugColliderRenderer())
         gameObjects.append(cube)
 
         # shorthand
@@ -149,5 +155,7 @@ class Showcase(GameBuilder):
         spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))
         spriteObject.AddComponent(AudioSource("meow", "src/sound/purr.wav"))
         spriteObject.AddComponent(Cat())
+        spriteObject.AddComponent(CollisionLogger(pygame.Vector3(0.05, 0.05, 0.05), "CatSprite"))
+        spriteObject.AddComponent(DebugColliderRenderer())
         spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         gameObjects.append(spriteObject)

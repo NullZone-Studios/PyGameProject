@@ -25,3 +25,12 @@ class Component:
     
     def Update(self, deltaTime: float):
         return
+
+    def OnCollisionEnter(self, other):
+        return
+
+    def OnCollisionStay(self, other):
+        return
+
+    def OnCollisionExit(self, other):
+        return
