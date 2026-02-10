@@ -9,6 +9,7 @@ from Components import (
     PolygonRenderer,
     SpriteRenderer
 )
+import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
@@ -128,3 +129,22 @@ class Showcase(GameBuilder):
         spriteObject.AddComponent(Cat())
         spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         gameObjects.append(spriteObject)
+        
+        overlayObject = GameObject("overlayUI", "overlay")
+        canvas = overlayObject.AddComponent(UI.Canvas())
+        panel = UI.Element("div")
+        panel.style.display = "flex"
+        panel.style.flexDirection = "row"
+        panel.renderer = UI.Rendering.RectangleRenderer()
+
+        btn1 = panel.Add(UI.Element("button"))
+        btn1.style.width = 120
+        btn1.renderer = UI.Rendering.RectangleRenderer()
+
+        btn2 = panel.Add(UI.Element("button"))
+        btn2.style.width = 120
+        btn2.renderer = UI.Rendering.RectangleRenderer()
+
+        canvas.root.Add(panel)
+        gameObjects.append(overlayObject)
+

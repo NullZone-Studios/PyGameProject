@@ -2,7 +2,7 @@
 
 from GameEssentials.component import Component
 from Components.UI.UIElement import Element
-from Components.UI.Layout.UILayoutEngine import layout_element
+from Components.UI.Layout.UILayoutEngine import LayoutElement
 
 import pygame
 
@@ -13,10 +13,10 @@ class Canvas(Component):
 
     def Render(self, screen):
         self._compute_styles(self.root)
-        layout_element(self.root)
-        self._draw(screen, self.root, pygame.Vector2(0, 0))
+        LayoutElement(self.root)
+        self.Draw(screen, self.root, pygame.Vector2(0, 0))
 
-    def _compute_styles(self, element):
+    def ComputeStyles(self, element):
         if element.parent:
             element.computedStyle.color = (
                 element.style.color or element.parent.computedStyle.color
@@ -30,7 +30,7 @@ class Canvas(Component):
         for child in element.children:
             self._compute_styles(child)
 
-    def _draw(self, screen, element, parentPos):
+    def Draw(self, screen, element, parentPos):
         pos = parentPos + pygame.Vector2(
             element.layout.x, element.layout.y
         ) + element.transform.offset
@@ -48,4 +48,4 @@ class Canvas(Component):
             element.renderer.draw(screen, rect, element.computedStyle)
 
         for child in element.children:
-            self._draw(screen, child, pos)
+            self.Draw(screen, child, pos)

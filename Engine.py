@@ -54,6 +54,9 @@ class Engine:
 
         def RenderQueue(screen: pygame.Surface, camera: Camera, queue):
             sw, sh = camera.ScreenWidth, camera.ScreenHeight
+            
+            
+            
             for item in queue:
                 if item["type"] == "sprite":
                     ndc = item["ndc"]
@@ -119,7 +122,6 @@ class Engine:
             # RENDER YOUR GAME HERE
             if GameWorld.MainCamera:
                 renderQueue = BuildRenderQueue(GameWorld.MainCamera)
-                renderQueue.sort(key=lambda r: r["depth"], reverse=True)
                 RenderQueue(screen, GameWorld.MainCamera, renderQueue)
 
             # flip() the display to put your work on screen
