@@ -55,9 +55,12 @@ class Engine:
         def RenderQueue(screen: pygame.Surface, camera: Camera, queue):
             sw, sh = camera.ScreenWidth, camera.ScreenHeight
             
+            worldItems = [item for item in queue if item["type"] in ["sprite", "triangle"]]
+            overlayItems = [item for item in queue if item["type"] == "overlay"]
             
-            
-            for item in queue:
+            # World
+            worldItems.sort(key=lambda r: r["depth"], reverse=True)
+            for item in worldItems:
                 if item["type"] == "sprite":
                     ndc = item["ndc"]
                     surface: pygame.Surface = item["surface"]
@@ -95,6 +98,13 @@ class Engine:
                         pygame.draw.polygon(screen, item["color"], item["points"])
                     else:
                         pygame.draw.polygon(screen, item["color"], item["points"], 1)
+            
+            # UI Overlay
+            overlayItems.sort(key= lambda r: r["layer"], reverse=True)
+            for item in overlayItems:
+                drawMethod = item["draw"]
+                if drawMethod:
+                    drawMethod(screen)
 
         game.Build(GameWorld.GameObjects)
         for obj in GameWorld.GameObjects:
