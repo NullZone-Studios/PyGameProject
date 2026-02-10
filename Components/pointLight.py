@@ -29,4 +29,4 @@ class PointLight(Light):
         
         direction /= distance
         attenuation = 1.0 - (distance / self.range)
-        return max(np.dot(normal, -dir), 0) * self.intensity * attenuation
+        return max(np.dot(normal, -direction), 0) * self.intensity * attenuation

@@ -7,7 +7,8 @@ from Components import (
     AudioSource,
     AudioListener,
     PolygonRenderer,
-    SpriteRenderer
+    SpriteRenderer,
+    Face
 )
 from Builder import GameBuilder
 import pygame
@@ -15,7 +16,7 @@ import numpy as np
 from Builder.ShowcaseScripts import Rotator, Move, Cat
 
 class Showcase(GameBuilder):
-    BACKGROUND_COLOR = pygame.Color(100,100,100)
+    BACKGROUND_COLOR = pygame.Color("blue")
     TITLE = "Showcase "
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
@@ -30,12 +31,13 @@ class Showcase(GameBuilder):
         cameraObject.AddComponent(Move())
         cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(AudioListener())
+        cameraObject.AddComponent(PointLight(pygame.Color("green"), 1))
         gameObjects.append(cameraObject)
 
         # ---------- LIGHT ----------
         lightObject = GameObject("Sun", "Light")
         lightObject.AddComponent(
-            DirectionalLight(color= pygame.Color(255,100,100), intensity=1.0)
+            DirectionalLight(color= pygame.Color(255,255,255), intensity=.8)
         )
         gameObjects.append(lightObject)
 
@@ -120,6 +122,27 @@ class Showcase(GameBuilder):
             ],
             color=c
         ))
+        
+        groundObject = GameObject("Ground", "Face")
+        groundObject.Transform.Translate(y=-10)
+        face = groundObject.AddComponent(Face(100,100))
+        groundLightObject = GameObject("GroundLight", "Light")
+        groundLightObject.Transform.Translate(y=2)
+        groundLightObject.AddComponent(PointLight(intensity=.8))
+        groundObject.AddChild(groundLightObject)
+        
+        gameObjects.append(groundObject)
+        
+        skyObject = GameObject("Sky", "Face")
+        skyObject.Transform.Translate(y=50)
+        skyObject.Transform.Rotate(pitch=np.pi)
+        face = skyObject.AddComponent(Face(1000,1000, pygame.Color(200,200,255)))
+        gameObjects.append(skyObject)
+        
+        skyLightObject = GameObject("skyLight", "Light", skyObject)
+        skyLightObject.Transform.Translate(y=2)
+        skyLightObject.Transform.Rotate(pitch=-np.pi/2)
+        skyLightObject.AddComponent(PointLight(intensity=.8))
         
         spriteObject = GameObject("Sprite1", "Sprite")
         spriteObject.Transform.Translate(-5,0,-5)

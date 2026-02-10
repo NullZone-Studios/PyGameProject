@@ -10,6 +10,7 @@ from .pointLight import PointLight
 from .audioListener import AudioListener
 from .audioSource import AudioSource
 from .script import Script
+from .face import Face
 
 
 __all__=[
@@ -19,6 +20,7 @@ __all__=[
     "Transform",
     "SpriteRenderer",
     "PolygonRenderer",
+    "Face",
     "Light",
     "DirectionalLight",
     "PointLight",
