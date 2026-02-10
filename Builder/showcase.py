@@ -9,7 +9,8 @@ from Components import (
     PolygonRenderer,
     SpriteRenderer,
     Face,
-    DebugColliderRenderer
+    DebugColliderRenderer,
+    ShapeRenderer
 )
 from Builder import GameBuilder
 import pygame
@@ -45,90 +46,16 @@ class Showcase(GameBuilder):
         )
         gameObjects.append(lightObject)
 
-        # ---------- CUBE ROOT ----------
+        # ---------- CUBE ----------
         cube = GameObject("Cube", "Geometry")
         cube.Transform.Position = pygame.Vector3(5,0,-5)
         cube.AddComponent(Rotator())
         cube.AddComponent(CollisionLogger(pygame.Vector3(2, 2, 2), "Cube"))
         cube.AddComponent(DebugColliderRenderer())
+        cube.AddComponent(ShapeRenderer("cube"))
         gameObjects.append(cube)
-
-        # shorthand
-        c = pygame.Color(1, 255, 255)
-        s = 1.0  # half-size
-
-        # ---------- FRONT ----------
-        front = GameObject("Front", "Face", cube)
-        front.AddComponent(PolygonRenderer(
-            vertices=[
-                np.array([-s, -s,  s]),
-                np.array([ s, -s,  s]),
-                np.array([ s,  s,  s]),
-                np.array([-s,  s,  s]),
-            ],
-            color=c
-        ))
-
-        # ---------- BACK ----------
-        back = GameObject("Back", "Face", cube)
-        back.AddComponent(PolygonRenderer(
-            vertices=[
-                np.array([ s, -s, -s]),
-                np.array([-s, -s, -s]),
-                np.array([-s,  s, -s]),
-                np.array([ s,  s, -s]),
-            ],
-            color=c
-        ))
-
-        # ---------- LEFT ----------
-        left = GameObject("Left", "Face", cube)
-        left.AddComponent(PolygonRenderer(
-            vertices=[
-                np.array([-s, -s, -s]),
-                np.array([-s, -s,  s]),
-                np.array([-s,  s,  s]),
-                np.array([-s,  s, -s]),
-            ],
-            color=c
-        ))
-
-        # ---------- RIGHT ----------
-        right = GameObject("Right", "Face", cube)
-        right.AddComponent(PolygonRenderer(
-            vertices=[
-                np.array([ s, -s,  s]),
-                np.array([ s, -s, -s]),
-                np.array([ s,  s, -s]),
-                np.array([ s,  s,  s]),
-            ],
-            color=c
-        ))
-
-        # ---------- TOP ----------
-        top = GameObject("Top", "Face", cube)
-        top.AddComponent(PolygonRenderer(
-            vertices=[
-                np.array([-s,  s,  s]),
-                np.array([ s,  s,  s]),
-                np.array([ s,  s, -s]),
-                np.array([-s,  s, -s]),
-            ],
-            color=c
-        ))
-
-        # ---------- BOTTOM ----------
-        bottom = GameObject("Bottom", "Face", cube)
-        bottom.AddComponent(PolygonRenderer(
-            vertices=[
-                np.array([-s, -s, -s]),
-                np.array([ s, -s, -s]),
-                np.array([ s, -s,  s]),
-                np.array([-s, -s,  s]),
-            ],
-            color=c
-        ))
         
+        # ---------- GROUND ----------
         groundObject = GameObject("Ground", "Face")
         groundObject.Transform.Translate(y=-10)
         face = groundObject.AddComponent(Face(100,100))
@@ -136,9 +63,9 @@ class Showcase(GameBuilder):
         groundLightObject.Transform.Translate(y=2)
         groundLightObject.AddComponent(PointLight(intensity=.8))
         groundObject.AddChild(groundLightObject)
-        
         gameObjects.append(groundObject)
         
+        # ---------- SKYBOX ----------
         skyObject = GameObject("Sky", "Face")
         skyObject.Transform.Translate(y=50)
         skyObject.Transform.Rotate(pitch=np.pi)
@@ -150,6 +77,7 @@ class Showcase(GameBuilder):
         skyLightObject.Transform.Rotate(pitch=-np.pi/2)
         skyLightObject.AddComponent(PointLight(intensity=.8))
         
+        # ---------- MEOW :D ----------
         spriteObject = GameObject("Sprite1", "Sprite")
         spriteObject.Transform.Translate(-5,0,-5)
         spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))

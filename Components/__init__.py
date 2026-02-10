@@ -13,6 +13,7 @@ from .script import Script
 from .face import Face
 from .collider import BoxCollider
 from .colliderRenderer import DebugColliderRenderer
+from .shapeRenderer import ShapeRenderer
 
 
 __all__=[
@@ -30,5 +31,6 @@ __all__=[
     "AudioSource",
     "Script",
     "BoxCollider",
-    "DebugColliderRenderer"
+    "DebugColliderRenderer",
+    "ShapeRenderer"
 ]
