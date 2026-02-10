@@ -49,3 +49,6 @@ class Canvas(Component):
 
         for child in element.children:
             self.Draw(screen, child, pos)
+            
+    def GetRenderData():
+        pass
