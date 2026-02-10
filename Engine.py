@@ -102,13 +102,13 @@ class Engine:
             # UI Overlay
             overlayItems.sort(key= lambda r: r["layer"], reverse=True)
             for item in overlayItems:
-                drawMethod = item["draw"]
-                if drawMethod:
-                    drawMethod(screen)
+                if item["surface"]:
+                    screen.blit(item["surface"], (0,0))
 
         game.Build(GameWorld.GameObjects)
         for obj in GameWorld.GameObjects:
             obj.Awake()
+        for obj in GameWorld.GameObjects:
             obj.Start()
 
         while running:

@@ -21,8 +21,9 @@ class GameWorld:
         return None
     
     @staticmethod
-    def Instantiate(gameObject: GameObject):
+    def Instantiate(gameObject: GameObject) -> GameObject:
         GameWorld.GameObjects.append(gameObject)
+        return gameObject
         
     @staticmethod
     def FindMainCamera():
