@@ -10,6 +10,8 @@ from .pointLight import PointLight
 from .audioListener import AudioListener
 from .audioSource import AudioSource
 from .script import Script
+from .collider import BoxCollider
+from .colliderRenderer import DebugColliderRenderer
 
 
 __all__=[
@@ -24,5 +26,7 @@ __all__=[
     "PointLight",
     "AudioListener",
     "AudioSource",
-    "Script"
+    "Script",
+    "BoxCollider",
+    "DebugColliderRenderer"
 ]

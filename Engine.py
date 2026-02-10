@@ -2,6 +2,7 @@ import pygame
 import numpy
 from Components import Camera, SpriteRenderer, Light
 from GameEssentials import GameObject, InputSystem, ButtonStateBind
+from GameEssentials.collisionSystem import CollisionSystem
 from typing import Optional
 from GameWorld import GameWorld
 
@@ -22,6 +23,7 @@ class Engine:
                 obj.Update(deltaTime)
                 if obj._destroyed:
                     GameWorld.GameObjects.remove(obj)
+            CollisionSystem.Update()
 
         def BuildRenderQueue(camera: Camera):
             queue = []
@@ -92,6 +94,12 @@ class Engine:
                         pygame.draw.polygon(screen, item["color"], item["points"])
                     else:
                         pygame.draw.polygon(screen, item["color"], item["points"], 1)
+                elif item["type"] == "line":
+                    pygame.draw.line(screen, item["color"], item["start"], item["end"], item["thickness"])
+        
+
+
+        # BUILD AND START GAME
 
         game.Build(GameWorld.GameObjects)
         for obj in GameWorld.GameObjects:
