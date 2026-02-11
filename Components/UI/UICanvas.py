@@ -2,6 +2,7 @@ from GameEssentials.component import Component
 from Components.UI.UIElement import Element
 from Components.camera import Camera
 from Components.light import Light
+from typing import Callable
 import pygame
 import numpy as np
 
@@ -31,14 +32,7 @@ class Canvas(Component):
         self.PrepareSurface()
         self.root.ResolveStyle(None)
         self.root.Layout(pygame.Rect(0,0, *self.surface.get_size()))
-        drawQueue: list = self.root.GetDrawData()
-        
-        drawQueue.sort(key=lambda e: e["depth"])
-        for item in drawQueue:
-            draw = item["draw"]
-            if draw:
-                draw(self.surface)
-                
+        self.root.Render(self.surface)
         
         if self.worldSpace:
             transform = self.GameObject.Transform

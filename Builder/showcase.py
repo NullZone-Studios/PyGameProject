@@ -149,6 +149,7 @@ class Showcase(GameBuilder):
         content.style = UI.Style(
             width=200,
             height=50,
+            overflow="hidden",
             background=pygame.Color("white"),
             borderColor=pygame.Color("black"),
             borderWidth=5,
@@ -157,7 +158,8 @@ class Showcase(GameBuilder):
         content1.style = content.style
         content2.style = content.style
         
-        text = content2.AddChild(UI.Label("label", "Hello World"))
+        text = content2.AddChild(UI.Label("label", "Hello World this is a very long line of text that is bound to overflow oh no"))
+        text2 = content1.AddChild(UI.Label("label", "This is yet another long line of text that is bound to overflow"))
         text.style = UI.Style(
             textAlign="center",
             verticalAlign="middle"

@@ -160,11 +160,10 @@ class Element:
         else:
             LayoutBlock()
 
-    def Draw(self, surface: Surface):
+    def Draw(self, surface: Surface, rectangle: pygame.Rect):
         if not self.computedStyle:
             return
-
-        rectangle = self.AbsoluteRectangle
+        
         style = self.computedStyle
 
         if style.background:
@@ -190,12 +189,107 @@ class Element:
                 border_bottom_right_radius=style.borderRadiusBottomRight or 0,
             )
 
-    def GetDrawData(self):
-        queue = []
+    def Render(self, surface: pygame.Surface, parentClip: Optional[pygame.Rect] = None, offset: Optional[Vector2] = None):
+        if not self.computedStyle:
+            return
+        
+        offset = offset if offset is not None else Vector2(0,0)
+        
+        style = self.computedStyle
+        rectangle: pygame.Rect = pygame.Rect(
+            offset.x + self.rectangle.x,
+            offset.y + self.rectangle.y,
+            self.rectangle.width,
+            self.rectangle.height
+        )
+        
+        effectiveClip = parentClip
+        
+        hidden = style.overflow in ("hidden", "scroll", "scroll-x", "scroll-y")
+        rounded = (style.borderRadiusTopLeft or style.borderRadiusTopRight or style.borderRadiusBottomLeft or style.borderRadiusBottomRight)
+        hasRoundedMask = hidden and rounded
+        
+        if hidden:
+            if effectiveClip:
+                effectiveClip = rectangle.clip(effectiveClip)
+            else:
+                effectiveClip = rectangle.copy()
+        
+        oldClip = surface.get_clip()
+        if effectiveClip:
+            surface.set_clip(effectiveClip)
+            
+        self.Draw(surface, rectangle)
+        
+        childOffset: Vector2 = Vector2(
+            rectangle.x - self.scrollOffset.x,
+            rectangle.y - self.scrollOffset.y
+        )
+        
+        if hasRoundedMask:
+            temp = pygame.Surface(rectangle.size, pygame.SRCALPHA)
+            
+            localOffset = Vector2(
+                -self.scrollOffset.x,
+                -self.scrollOffset.y
+            )
+            for child in self.children:
+                    child.Render(temp, None, localOffset)
 
-        queue.append({"depth": self.depth, "draw": self.Draw})
+            mask = pygame.Surface(rectangle.size, pygame.SRCALPHA)
+            pygame.draw.rect(
+                mask,
+                (255,255,255,255),
+                mask.get_rect(),
+                border_top_left_radius=style.borderRadiusTopLeft or 0,
+                border_top_right_radius=style.borderRadiusTopRight or 0,
+                border_bottom_left_radius=style.borderRadiusBottomLeft or 0,
+                border_bottom_right_radius=style.borderRadiusBottomRight or 0
+            )
+            
+            temp.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
+            
+            if parentClip:
+                surface.set_clip(parentClip)
+            
+            surface.blit(temp, rectangle.topleft)
+        else:
+            
+            for child in self.children:
+                    child.Render(surface, effectiveClip, childOffset)
 
-        for child in self.children:
-            queue.extend(child.GetDrawData())
+        surface.set_clip(oldClip)
 
-        return queue
+    def HitTest(self, point: Vector2, offset: Optional[Vector2] = None) -> Optional["Element"]:
+        if not self.computedStyle:
+            return None
+        
+        offset = offset if offset is not None else Vector2(0,0)
+        
+        rectangle = pygame.Rect(
+            offset.x + self.rectangle.x,
+            offset.y + self.rectangle.y,
+            self.rectangle.width,
+            self.rectangle.height
+        )
+        
+        style = self.computedStyle
+        
+        if style.overflow in ("hidden", "scroll", "scroll-x", "scroll-y"):
+            if not rectangle.collidepoint(point):
+                return None
+        else:
+            if not rectangle.collidepoint(point):
+                return None
+        
+        childOffset = Vector2(
+            rectangle.x - self.scrollOffset.x,
+            rectangle.y - self.scrollOffset.y
+        )
+        
+        for child in reversed(self.children):
+            hit = child.HitTest(point, childOffset)
+            if hit:
+                return hit
+            
+        return self

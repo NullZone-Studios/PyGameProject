@@ -6,14 +6,14 @@ class Label(Element):
         super().__init__(tag)
         self.Text = text
         
-    def Draw(self, surface):
-        super().Draw(surface)
+    def Draw(self, surface, rectangle: pygame.Rect):
+        super().Draw(surface, rectangle)
 
         if not self.computedStyle:
             return
 
         style = self.computedStyle
-        rect = self.AbsoluteRectangle
+        rect = rectangle
 
         font = style.font or pygame.font.SysFont("sans-serif", 12)
 
