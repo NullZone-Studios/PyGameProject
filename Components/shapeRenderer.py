@@ -4,9 +4,11 @@ from GameEssentials import Component
 from Components import PolygonRenderer
 
 class ShapeRenderer(Component):
-    def __init__(self, shape: str = "cube"):
+    def __init__(self, shape: str = "cube", color = pygame.Color(1, 255, 255), scale = (1, 1, 1)):
         super().__init__()
         self.shape = shape
+        self.color = color
+        self.scale = np.array(scale)
         
     def Start(self):
         if self.shape.lower() == "cube":
@@ -15,6 +17,8 @@ class ShapeRenderer(Component):
             raise NotImplementedError("Pentagon shape not implemented yet.")
         elif self.shape.lower() == "cone":
             raise NotImplementedError("Cone shape not implemented yet.")
+        else:
+            raise ValueError(f"Shape '{self.shape}' is not supported.")
 
         return super().Start()
 
@@ -22,17 +26,17 @@ class ShapeRenderer(Component):
     def CreateCube(self):
         from GameEssentials.gameObject import GameObject
         # shorthand
-        c = pygame.Color(1, 255, 255)
+        c = self.color
         s = 1.0  # half-size
 
         # ---------- FRONT ----------
         front = GameObject("Front", "Face", self.GameObject)
         front.AddComponent(PolygonRenderer(
             vertices=[
-                np.array([-s, -s,  s]),
-                np.array([ s, -s,  s]),
-                np.array([ s,  s,  s]),
-                np.array([-s,  s,  s]),
+                np.array([-s, -s,  s]) * self.scale,
+                np.array([ s, -s,  s]) * self.scale,
+                np.array([ s,  s,  s]) * self.scale,
+                np.array([-s,  s,  s]) * self.scale,
             ],
             color=c
         ))
@@ -41,10 +45,10 @@ class ShapeRenderer(Component):
         back = GameObject("Back", "Face", self.GameObject)
         back.AddComponent(PolygonRenderer(
             vertices=[
-                np.array([ s, -s, -s]),
-                np.array([-s, -s, -s]),
-                np.array([-s,  s, -s]),
-                np.array([ s,  s, -s]),
+                np.array([ s, -s, -s]) * self.scale,
+                np.array([-s, -s, -s]) * self.scale,
+                np.array([-s,  s, -s]) * self.scale,
+                np.array([ s,  s, -s]) * self.scale,
             ],
             color=c
         ))
@@ -53,10 +57,10 @@ class ShapeRenderer(Component):
         left = GameObject("Left", "Face", self.GameObject)
         left.AddComponent(PolygonRenderer(
             vertices=[
-                np.array([-s, -s, -s]),
-                np.array([-s, -s,  s]),
-                np.array([-s,  s,  s]),
-                np.array([-s,  s, -s]),
+                np.array([-s, -s, -s]) * self.scale,
+                np.array([-s, -s,  s]) * self.scale,
+                np.array([-s,  s,  s]) * self.scale,
+                np.array([-s,  s, -s]) * self.scale,
             ],
             color=c
         ))
@@ -65,10 +69,10 @@ class ShapeRenderer(Component):
         right = GameObject("Right", "Face", self.GameObject)
         right.AddComponent(PolygonRenderer(
             vertices=[
-                np.array([ s, -s,  s]),
-                np.array([ s, -s, -s]),
-                np.array([ s,  s, -s]),
-                np.array([ s,  s,  s]),
+                np.array([ s, -s,  s]) * self.scale,
+                np.array([ s, -s, -s]) * self.scale,
+                np.array([ s,  s, -s]) * self.scale,
+                np.array([ s,  s,  s]) * self.scale,
             ],
             color=c
         ))
@@ -77,10 +81,10 @@ class ShapeRenderer(Component):
         top = GameObject("Top", "Face", self.GameObject)
         top.AddComponent(PolygonRenderer(
             vertices=[
-                np.array([-s,  s,  s]),
-                np.array([ s,  s,  s]),
-                np.array([ s,  s, -s]),
-                np.array([-s,  s, -s]),
+                np.array([-s,  s,  s]) * self.scale,
+                np.array([ s,  s,  s]) * self.scale,
+                np.array([ s,  s, -s]) * self.scale,
+                np.array([-s,  s, -s]) * self.scale,
             ],
             color=c
         ))
@@ -89,10 +93,10 @@ class ShapeRenderer(Component):
         bottom = GameObject("Bottom", "Face", self.GameObject)
         bottom.AddComponent(PolygonRenderer(
             vertices=[
-                np.array([-s, -s, -s]),
-                np.array([ s, -s, -s]),
-                np.array([ s, -s,  s]),
-                np.array([-s, -s,  s]),
+                np.array([-s, -s, -s]) * self.scale,
+                np.array([ s, -s, -s]) * self.scale,
+                np.array([ s, -s,  s]) * self.scale,
+                np.array([-s, -s,  s]) * self.scale,
             ],
             color=c
         ))

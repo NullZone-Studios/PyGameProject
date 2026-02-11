@@ -52,7 +52,7 @@ class Showcase(GameBuilder):
         cube.AddComponent(Rotator())
         cube.AddComponent(CollisionLogger(pygame.Vector3(2, 2, 2), "Cube"))
         cube.AddComponent(DebugColliderRenderer())
-        cube.AddComponent(ShapeRenderer("cube"))
+        cube.AddComponent(ShapeRenderer("cube", pygame.Color(255,0,0), (1,1,2)))
         gameObjects.append(cube)
         
         # ---------- GROUND ----------
