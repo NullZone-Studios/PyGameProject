@@ -33,7 +33,12 @@ class ResolvedStyle(Style):
         self.background = override.background if override.background is not None else base.background
         self.borderColor = override.borderColor if override.borderColor is not None else base.borderColor
         self.borderWidth = override.borderWidth if override.borderWidth is not None else base.borderWidth
+        
+        # --- font visuals ---
         self.color = override.color if override.color is not None else base.color
+        self.font = override.font if override.font is not None else base.font
+        self.textAlign = override.textAlign if override.textAlign is not None else base.textAlign
+        self.verticalAlign = override.verticalAlign if override.verticalAlign is not None else base.verticalAlign
 
         # --- border radius (CSS-style fallback chain) ---
         radius = override.borderRadius if override.borderRadius is not None else base.borderRadius
@@ -45,7 +50,7 @@ class ResolvedStyle(Style):
             if base.borderRadiusTopLeft is not None
             else radius
             if radius is not None
-            else 0
+            else None
         )
 
         self.borderRadiusTopRight = (
@@ -55,7 +60,7 @@ class ResolvedStyle(Style):
             if base.borderRadiusTopRight is not None
             else radius
             if radius is not None
-            else 0
+            else None
         )
 
         self.borderRadiusBottomLeft = (
@@ -65,7 +70,7 @@ class ResolvedStyle(Style):
             if base.borderRadiusBottomLeft is not None
             else radius
             if radius is not None
-            else 0
+            else None
         )
 
         self.borderRadiusBottomRight = (
@@ -75,5 +80,5 @@ class ResolvedStyle(Style):
             if base.borderRadiusBottomRight is not None
             else radius
             if radius is not None
-            else 0
+            else None
         )

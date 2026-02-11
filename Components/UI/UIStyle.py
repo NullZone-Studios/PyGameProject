@@ -23,7 +23,10 @@ class Style:
         right: Optional[int] = None,
         top: Optional[int] = None,
         bottom: Optional[int] = None,
-        color: Optional[pygame.Color] = None
+        color: Optional[pygame.Color] = None,
+        font: Optional[pygame.Font] = None,
+        textAlign: Optional[str] = None,
+        verticalAlign: Optional[str] = None
         ):
         self.position = position
         self.display = display
@@ -45,3 +48,6 @@ class Style:
         self.top = top
         self.bottom = bottom
         self.color = color
+        self.font = font
+        self.textAlign = textAlign
+        self.verticalAlign = verticalAlign

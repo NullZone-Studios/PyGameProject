@@ -133,49 +133,44 @@ class Showcase(GameBuilder):
         overlayObject = GameObject("overlay", "overlay")
         gameObjects.append(overlayObject)
         
-        canvas: UI.Canvas = overlayObject.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, color=pygame.Color(0,255,0,100)))
-        panel = UI.Element("panel")
+        canvas: UI.Canvas = overlayObject.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y))
+        panel = canvas.root.AddChild(UI.Element("panel"))
         panel.style = UI.Style(
             display="flex",
             flexDirection="row",
             gap=8,
-            background=pygame.Color("gray")
+            background=pygame.Color(0,0,0,0),
+            font=pygame.font.SysFont("sans-serif", 32)
         )
         
-        content = UI.Element("content")
-        content1 = UI.Element("content")
+        content = panel.AddChild(UI.Element("content"))
+        content1 = panel.AddChild(UI.Element("content"))
+        content2 = panel.AddChild(UI.Element("content"))
         content.style = UI.Style(
             width=200,
             height=50,
             background=pygame.Color("white"),
             borderColor=pygame.Color("black"),
             borderWidth=5,
-            borderRadius=10
+            borderRadius=100,
         )
-        content1.style = UI.Style(
-            left=200,
-            width=200,
-            height=50,
-            background=pygame.Color("white"),
-            borderColor=pygame.Color("black"),
-            borderWidth=5,
-            borderRadius=10
-        )
-
+        content1.style = content.style
+        content2.style = content.style
         
-        badge = UI.Element("badge")
+        text = content2.AddChild(UI.Label("label", "Hello World"))
+        text.style = UI.Style(
+            textAlign="center",
+            verticalAlign="middle"
+        )
+        
+        badge = panel.AddChild(UI.Element("badge"))
         badge.style = UI.Style(
             position="absolute",
-            right=4,
-            top=4,
-            width=16,
-            height=16,
+            left=4,
+            bottom=4,
+            width=30,
+            height=30,
             background=pygame.Color("red")
         )
-        
-        canvas.root.AddChild(panel)
-        panel.AddChild(badge)
-        panel.AddChild(content)
-        panel.AddChild(content1)
         
 

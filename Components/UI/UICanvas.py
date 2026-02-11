@@ -64,10 +64,10 @@ class Canvas(Component):
             ndc = clip / clip[3]
 
             # --- simple lighting ---
-            ambient = 0.25
-            r = int(self.color.r * ambient)
-            g = int(self.color.g * ambient)
-            b = int(self.color.b * ambient)
+            ambient = 1 # set to 1 for now to ensure UI is lit up in world space
+            r = int(255 * ambient)
+            g = int(255 * ambient)
+            b = int(255 * ambient)
 
             if lights:
                 for light in lights:
