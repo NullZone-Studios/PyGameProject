@@ -4,12 +4,13 @@ from GameEssentials import Component
 from Components import PolygonRenderer
 
 class ShapeRenderer(Component):
-    def __init__(self, shape: str = "cube", color = pygame.Color(1, 255, 255), scale = (1, 1, 1), offset = (0, 0, 0)):
+    def __init__(self, shape: str = "cube", color = pygame.Color(1, 255, 255), scale = (1, 1, 1), offset = (0, 0, 0), rotation_offset = (0, 0, 0)):
         super().__init__()
         self.shape = shape
         self.color = color
         self.scale = np.array(scale)
         self.offset = np.array(offset)
+        self.rotation_offset = rotation_offset
         
     def Start(self):
         if self.shape.lower() == "cube":
@@ -32,6 +33,8 @@ class ShapeRenderer(Component):
 
         # ---------- FRONT ----------
         front = GameObject("Front", "Face", self.GameObject)
+        if self.rotation_offset != (0, 0, 0):
+            front.Transform.Rotate(pitch=self.rotation_offset[0], yaw=self.rotation_offset[1], roll=self.rotation_offset[2])
         front.AddComponent(PolygonRenderer(
             vertices=[
                 np.array([-s, -s,  s]) * self.scale + self.offset,
@@ -44,6 +47,8 @@ class ShapeRenderer(Component):
 
         # ---------- BACK ----------
         back = GameObject("Back", "Face", self.GameObject)
+        if self.rotation_offset != (0, 0, 0):
+            back.Transform.Rotate(pitch=self.rotation_offset[0], yaw=self.rotation_offset[1], roll=self.rotation_offset[2])
         back.AddComponent(PolygonRenderer(
             vertices=[
                 np.array([ s, -s, -s]) * self.scale + self.offset,
@@ -56,6 +61,8 @@ class ShapeRenderer(Component):
 
         # ---------- LEFT ----------
         left = GameObject("Left", "Face", self.GameObject)
+        if self.rotation_offset != (0, 0, 0):
+            left.Transform.Rotate(pitch=self.rotation_offset[0], yaw=self.rotation_offset[1], roll=self.rotation_offset[2])
         left.AddComponent(PolygonRenderer(
             vertices=[
                 np.array([-s, -s, -s]) * self.scale + self.offset,
@@ -68,6 +75,8 @@ class ShapeRenderer(Component):
 
         # ---------- RIGHT ----------
         right = GameObject("Right", "Face", self.GameObject)
+        if self.rotation_offset != (0, 0, 0):
+            right.Transform.Rotate(pitch=self.rotation_offset[0], yaw=self.rotation_offset[1], roll=self.rotation_offset[2])
         right.AddComponent(PolygonRenderer(
             vertices=[
                 np.array([ s, -s,  s]) * self.scale + self.offset,
@@ -80,6 +89,8 @@ class ShapeRenderer(Component):
 
         # ---------- TOP ----------
         top = GameObject("Top", "Face", self.GameObject)
+        if self.rotation_offset != (0, 0, 0):
+            top.Transform.Rotate(pitch=self.rotation_offset[0], yaw=self.rotation_offset[1], roll=self.rotation_offset[2])
         top.AddComponent(PolygonRenderer(
             vertices=[
                 np.array([-s,  s,  s]) * self.scale + self.offset,
@@ -92,6 +103,8 @@ class ShapeRenderer(Component):
 
         # ---------- BOTTOM ----------
         bottom = GameObject("Bottom", "Face", self.GameObject)
+        if self.rotation_offset != (0, 0, 0):
+            bottom.Transform.Rotate(pitch=self.rotation_offset[0], yaw=self.rotation_offset[1], roll=self.rotation_offset[2])
         bottom.AddComponent(PolygonRenderer(
             vertices=[
                 np.array([-s, -s, -s]) * self.scale + self.offset,
