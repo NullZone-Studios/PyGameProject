@@ -3,6 +3,7 @@ from typing import Optional
 import pygame
 from .UIStyle import Style
 from .UIResolvedStyle import ResolvedStyle
+from .UIEvent import Event
 
 
 class Element:
@@ -27,6 +28,28 @@ class Element:
         if child in self.children:
             child.parent = None
             self.children.remove(child)
+            
+    def Query(self, elementType: Optional[type] = None, tag: Optional[str] = None) -> Optional["Element"]:
+        if elementType and tag:
+            if isinstance(self, elementType) and self.tag == tag:
+                return self
+            for child in self.children:
+                return child.Query(elementType = elementType, tag = tag)
+        elif elementType:
+            if isinstance(self, elementType):
+                return self
+            for child in self.children:
+                return child.Query(elementType = elementType)
+        elif tag:
+            if self.tag == tag:
+                return self
+            for child in self.children:
+                return child.Query(tag = tag)
+        else:
+            return None
+        
+    def Q(self, elementType: Optional[type] = None, tag: Optional[str] = None):
+        return self.Query(elementType = elementType, tag = tag)
 
     @property
     def AbsoluteRectangle(self) -> pygame.Rect:
@@ -293,3 +316,7 @@ class Element:
                 return hit
             
         return self
+    
+    def HandleEvent(self, event: Event):
+        if self.parent:
+            self.parent.HandleEvent(event)

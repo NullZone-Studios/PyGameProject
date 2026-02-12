@@ -5,15 +5,22 @@ from Components.light import Light
 from typing import Callable
 import pygame
 import numpy as np
+from .UIEvent import Event
+from .UIInputLayer import UILayer
 
 class Canvas(Component):
-    def __init__(self, width: int = 100, height: int = 100, layer: int = 0, color: pygame.Color = pygame.Color(0,0,0,0), worldSpace: bool = False):
+    def __init__(self, width: int = 100, height: int = 100, layer: int = 0, color: pygame.Color = pygame.Color(0,0,0,0), worldSpace: bool = False, inputSystem = None):
         super().__init__()
         self.root = Element("root")
         self.surface: pygame.Surface = pygame.Surface((width,height), pygame.SRCALPHA)
         self.color = color
         self.worldSpace = worldSpace
         self.layer = layer
+        
+        if inputSystem:
+            inputSystem.AddLayer(UILayer(self))
+        
+        
     
     @property
     def Position2D(self) -> pygame.Vector2:
@@ -101,5 +108,30 @@ class Canvas(Component):
                 "surface": self.surface,
                 "position": self.Position2D
             }
+    def DispatchEvent(root: Element, event: Event) -> bool:
+        target = root.HitTest(event.position)
+        if not target:
+            return False
         
+        event.target = target
+        
+        path = []
+        current = target
+        while current:
+            path.append(current)
+            current = current.parent
+            
+        event.currentTarget = target
+        target.HandleEvent(event)
+        if event.propagationStopped:
+            return True
+        
+        for element in path[1:]:
+            event.currentTarget = element
+            element.HandleEvent(event)
+            
+            if event.propagationStopped:
+                return True
+        return True        
+    
         

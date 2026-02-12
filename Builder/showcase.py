@@ -1,4 +1,4 @@
-from GameEssentials import GameObject, InputSystem, ButtonStateBind, SoundEngine
+from GameEssentials import GameObject, Input, SoundEngine
 from Components import (
     Transform,
     Camera,
@@ -25,14 +25,12 @@ class Showcase(GameBuilder):
         pygame.mouse.set_pos((self.RESOLUTION.x/2, self.RESOLUTION.y/2))
         pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
     
-    def Build(self, gameObjects: list[GameObject]):
-        InputSystem.GetInstance().KeyBindings[pygame.K_ESCAPE] = ButtonStateBind(
-            pressed= lambda _: self.ToggleMouse()
-        )
+    def Build(self, engine):
+        gameObjects = engine.world.GameObjects
         
         # ---------- CAMERA ----------
         cameraObject = GameObject("MainCamera", "Camera")
-        cameraObject.AddComponent(Move())
+        #cameraObject.AddComponent(Move())
         cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(AudioListener())
         gameObjects.append(cameraObject)
@@ -130,14 +128,14 @@ class Showcase(GameBuilder):
         spriteObject.Transform.Translate(-5,0,-5)
         spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))
         spriteObject.AddComponent(AudioSource("meow", "src/sound/purr.wav"))
-        spriteObject.AddComponent(Cat())
+        spriteObject.AddComponent(Cat(cameraObject))
         spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         gameObjects.append(spriteObject)
         
         overlayObject = GameObject("overlay", "overlay")
         gameObjects.append(overlayObject)
         
-        canvas: UI.Canvas = overlayObject.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y))
+        canvas: UI.Canvas = overlayObject.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem=engine.input))
         panel = canvas.root.AddChild(UI.Element("panel"))
         panel.style = UI.Style(
             display="flex",
@@ -149,7 +147,7 @@ class Showcase(GameBuilder):
         
         content = panel.AddChild(UI.Element("content"))
         content1 = panel.AddChild(UI.Element("content"))
-        content2 = panel.AddChild(UI.Element("content"))
+        content2 = panel.AddChild(UI.Button("BIG BUTTON"))
         content.style = UI.Style(
             width=200,
             height=50,
@@ -161,13 +159,6 @@ class Showcase(GameBuilder):
         )
         content1.style = content.style
         content2.style = content.style
-        
-        text = content2.AddChild(UI.Label("label", "Hello World this is a very long line of text that is bound to overflow oh no"))
-        text2 = content1.AddChild(UI.Label("label", "This is yet another long line of text that is bound to overflow"))
-        text.style = UI.Style(
-            textAlign="center",
-            verticalAlign="middle"
-        )
         
         badge = panel.AddChild(UI.Element("badge"))
         badge.style = UI.Style(

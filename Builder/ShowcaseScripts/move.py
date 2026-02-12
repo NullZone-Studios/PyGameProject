@@ -1,5 +1,5 @@
 from Components import Transform, Script
-from GameEssentials import InputSystem, ButtonStateBind
+from GameEssentials import Input
 import pygame
 import numpy as np
 
@@ -45,36 +45,7 @@ class Move(Script):
     def Start(self):
         pygame.mouse.set_relative_mode(True)
         
-        InputSystem.GetInstance().KeyBindings[pygame.K_w] = ButtonStateBind(
-            pressed= lambda _: self.addZ(-self.speed),
-            held= None,
-            released= lambda _: self.addZ(self.speed)
-        )
-        InputSystem.GetInstance().KeyBindings[pygame.K_a] = ButtonStateBind(
-            pressed= lambda _: self.addX(-self.speed),
-            held= None,
-            released= lambda _: self.addX(self.speed)
-        )
-        InputSystem.GetInstance().KeyBindings[pygame.K_s] = ButtonStateBind(
-            pressed= lambda _: self.addZ(self.speed),
-            held= None,
-            released= lambda _: self.addZ(-self.speed)
-        )
-        InputSystem.GetInstance().KeyBindings[pygame.K_d] = ButtonStateBind(
-            pressed= lambda _: self.addX(self.speed),
-            held= None,
-            released= lambda _: self.addX(-self.speed)
-        )
-        InputSystem.GetInstance().KeyBindings[pygame.K_SPACE] = ButtonStateBind(
-            pressed= lambda _: self.addY(self.speed),
-            held= None,
-            released= lambda _: self.addY(-self.speed)
-        )
-        InputSystem.GetInstance().KeyBindings[pygame.K_c] = ButtonStateBind(
-            pressed= lambda _: self.addY(-self.speed),
-            held= None,
-            released= lambda _: self.addY(self.speed)
-        )
+        
         
     def addZ(self, value: float):
         self.movementDirection.z += value
