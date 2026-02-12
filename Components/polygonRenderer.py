@@ -87,6 +87,7 @@ class PolygonRenderer(Component):
         
         normal /= length
 
+    
         cameraWorldPosition = cameraTransform.WorldPosition
         cameraPosition = np.array([cameraWorldPosition.x, cameraWorldPosition.y, cameraWorldPosition.z])
         
