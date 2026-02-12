@@ -19,6 +19,8 @@ class ShapeRenderer(Component):
             raise NotImplementedError("Pentagon shape not implemented yet.")
         elif self.shape.lower() == "cone":
             self.CreateCone()
+        elif self.shape.lower() == "crystal":
+            self.CreateCrystal()
         else:
             raise ValueError(f"Shape '{self.shape}' is not supported.")
 
@@ -167,3 +169,35 @@ class ShapeRenderer(Component):
             vertices=[v2, v3, v0],
             color=c
         ))
+    
+    def CreateCrystal(self):
+        from GameEssentials.gameObject import GameObject
+        # Octahedron (two pyramids base-to-base)
+        c = self.color
+        r = 1.0
+        verts = [
+            np.array([ r, 0, 0]) * self.scale + self.offset,
+            np.array([-r, 0, 0]) * self.scale + self.offset,
+            np.array([0,  r, 0]) * self.scale + self.offset,
+            np.array([0, -r, 0]) * self.scale + self.offset,
+            np.array([0, 0,  r]) * self.scale + self.offset,
+            np.array([0, 0, -r]) * self.scale + self.offset,
+        ]
+
+        faces = [
+            [0, 2, 4], [0, 4, 3], [0, 3, 5], [0, 5, 2],
+            [1, 2, 5], [1, 5, 3], [1, 3, 4], [1, 4, 2]
+        ]
+
+        for i, face in enumerate(faces):
+            face_obj = GameObject(f"CrystalFace{i}", "Face", self.GameObject)
+            if self.rotation_offset != (0, 0, 0):
+                face_obj.Transform.Rotate(
+                    pitch=self.rotation_offset[0],
+                    yaw=self.rotation_offset[1],
+                    roll=self.rotation_offset[2]
+                )
+            face_obj.AddComponent(PolygonRenderer(
+                vertices=[verts[face[0]], verts[face[1]], verts[face[2]]],
+                color=c
+            ))

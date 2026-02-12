@@ -10,7 +10,7 @@ class CameraRenderType:
 class Camera(Component):
     def __init__(self, screenWidth: int = 1280, screenHeight: int = 720):
         super().__init__()
-        self.FOV: int = 60
+        self.FOV: int = 80
         self.Near: float = 0.1
         self.Far: float = 1000.0
         self.RenderType = CameraRenderType.PERSPECTIVE

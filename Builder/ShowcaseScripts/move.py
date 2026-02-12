@@ -4,7 +4,7 @@ import pygame
 import numpy as np
 
 class Move(Script):
-    MOUSE_SENSITIVITY = .33
+    MOUSE_SENSITIVITY = .20
     
     def __init__(self):
         super().__init__()
