@@ -1,6 +1,7 @@
 from GameEssentials.Input import InputLayer, InputEvent, DeviceType, ButtonState, MouseCodes
 from .UIEvent import Event, EventType
-from pygame import Vector2
+from pygame import Vector2, mouse, cursors
+import pygame
 from typing import Optional
 
 class UILayer(InputLayer):
@@ -26,18 +27,26 @@ class UILayer(InputLayer):
             if hoverTarget != self.hovered:
                 if self.hovered:
                     e = Event(EventType.MOUSE_LEAVE, position=pos)
-                    self.hovered.HandleEvent(e)
+                    event.consumed = self.hovered.HandleEvent(e)
                 if hoverTarget:
                     e = Event(EventType.MOUSE_ENTER, position=pos)
-                    hoverTarget.HandleEvent(e)
+                    event.consumed = hoverTarget.HandleEvent(e)
                 self.hovered = hoverTarget
+                
+                # --- Cursor changing ---
+                if self.hovered and self.hovered.cursor:
+                    mouse.set_cursor(self.hovered.cursor)
+                elif self.hovered and self.hovered.parent and self.hovered.parent.cursor:
+                    mouse.set_cursor(self.hovered.parent.cursor)
+                else:
+                    mouse.set_cursor(cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW))
 
             # drag detection
             if self.lastMousePos:
                 delta = pos - self.lastMousePos
                 if self.pressed and delta.length_squared() > 0 and self.hovered:
                     e = Event(EventType.MOUSE_DRAG, position=pos, delta=delta)
-                    self.hovered.HandleEvent(e)
+                    event.consumed = self.hovered.HandleEvent(e)
 
             self.lastMousePos = pos
             return  # handled move event
@@ -46,36 +55,25 @@ class UILayer(InputLayer):
         if event.code == MouseCodes.SCROLL and event.delta:  # reserved code for wheel
             if self.hovered:
                 e = Event(EventType.MOUSE_SCROLL, delta=event.delta, position=pos)
-                self.hovered.HandleEvent(e)
+                event.consumed = self.hovered.HandleEvent(e)
             return  # handled scroll
 
         # --- BUTTON EVENTS (click, down, up) ---
         if not pos or event.state is None:
             return
 
-        # hover detection for button events
-        hoverTarget = canvasRoot.HitTest(pos)
-        if hoverTarget != self.hovered:
-            if self.hovered:
-                e = Event(EventType.MOUSE_LEAVE, position=pos)
-                self.hovered.HandleEvent(e)
-            if hoverTarget:
-                e = Event(EventType.MOUSE_ENTER, position=pos)
-                hoverTarget.HandleEvent(e)
-            self.hovered = hoverTarget
-
         # button down
         if event.state == ButtonState.PRESSED:
             if self.hovered:
                 e = Event(EventType.MOUSE_DOWN, position=pos)
-                self.hovered.HandleEvent(e)
+                event.consumed = self.hovered.HandleEvent(e)
             self.pressed = True
 
         # button up
         elif event.state == ButtonState.RELEASED:
             if self.hovered:
                 e = Event(EventType.MOUSE_UP, position=pos)
-                self.hovered.HandleEvent(e)
+                event.consumed = self.hovered.HandleEvent(e)
                 e = Event(EventType.MOUSE_CLICK, position=pos)
-                self.hovered.HandleEvent(e)
+                event.consumed = self.hovered.HandleEvent(e)
             self.pressed = False

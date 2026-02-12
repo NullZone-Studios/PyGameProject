@@ -107,31 +107,6 @@ class Canvas(Component):
                 "layer": self.layer,
                 "surface": self.surface,
                 "position": self.Position2D
-            }
-    def DispatchEvent(root: Element, event: Event) -> bool:
-        target = root.HitTest(event.position)
-        if not target:
-            return False
-        
-        event.target = target
-        
-        path = []
-        current = target
-        while current:
-            path.append(current)
-            current = current.parent
-            
-        event.currentTarget = target
-        target.HandleEvent(event)
-        if event.propagationStopped:
-            return True
-        
-        for element in path[1:]:
-            event.currentTarget = element
-            element.HandleEvent(event)
-            
-            if event.propagationStopped:
-                return True
-        return True        
+            }       
     
         

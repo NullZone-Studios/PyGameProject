@@ -16,6 +16,7 @@ class Element:
 
         self.rectangle: pygame.Rect = pygame.Rect(0, 0, 0, 0)
         self.scrollOffset: Vector2 = Vector2(0, 0)
+        self.cursor: pygame.Cursor = None
 
         self.depth = 0
 
@@ -317,6 +318,7 @@ class Element:
             
         return self
     
-    def HandleEvent(self, event: Event):
-        if self.parent:
-            self.parent.HandleEvent(event)
+    def HandleEvent(self, event: Event) -> bool:
+        if not event.stopped and self.parent:
+            return self.parent.HandleEvent(event)
+        return False
