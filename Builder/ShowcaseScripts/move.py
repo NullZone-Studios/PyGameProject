@@ -30,7 +30,14 @@ class Move(Script):
             offset = pygame.Vector2(screenWidht/2, screenHeight/2) - position
             if offset.magnitude() > 0:
                 offset.normalize()
-            transform.Rotate(offset.y * deltaTime * Move.MOUSE_SENSITIVITY, offset.x * deltaTime * Move.MOUSE_SENSITIVITY)
+            
+            pitch = offset.y * deltaTime * Move.MOUSE_SENSITIVITY
+            yaw = offset.x * deltaTime * Move.MOUSE_SENSITIVITY
+                
+            transform.Rotate(
+                pitch=pitch,
+                yaw= -yaw if transform.Rotation.x > np.pi/2 and transform.Rotation.x < np.pi * 1.5 else yaw 
+            )
             pygame.mouse.set_pos(screenWidht/2, screenHeight/2)
         
         

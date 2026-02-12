@@ -4,6 +4,8 @@ from pygame import Vector3
 import numpy as np
 
 class Transform(Component):
+    TWO_PI = 2 * np.pi
+    
     def __init__(self, position: Optional[Vector3] = None, rotation: Optional[Vector3] = None, scale: Optional[Vector3] = None):
         super().__init__()
         self.Position: Vector3 = position or Vector3(0,0,0)
@@ -19,12 +21,16 @@ class Transform(Component):
         self.Position.z += z
         
     def SetRotation(self, rotation: Vector3):
-        self.Rotation = rotation
+        self.Rotation = Vector3(
+            rotation.x % self.TWO_PI,
+            rotation.y % self.TWO_PI,
+            rotation.z % self.TWO_PI
+        )
         
     def Rotate(self, pitch: float = 0, yaw: float =0, roll: float =0):
-        self.Rotation.x += pitch
-        self.Rotation.y += yaw
-        self.Rotation.z += roll
+        self.Rotation.x = np.abs((self.Rotation.x+pitch) % self.TWO_PI)
+        self.Rotation.y = np.abs((self.Rotation.y+yaw) % self.TWO_PI)
+        self.Rotation.z = np.abs((self.Rotation.z+roll) % self.TWO_PI)
     
     def SetScale(self, scale: Vector3):
         self.Scale = scale

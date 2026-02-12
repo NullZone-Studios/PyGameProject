@@ -21,9 +21,13 @@ class Showcase(GameBuilder):
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
     
+    def ToggleMouse(self):
+        pygame.mouse.set_pos((self.RESOLUTION.x/2, self.RESOLUTION.y/2))
+        pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
+    
     def Build(self, gameObjects: list[GameObject]):
         InputSystem.GetInstance().KeyBindings[pygame.K_ESCAPE] = ButtonStateBind(
-            pressed= lambda _: pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
+            pressed= lambda _: self.ToggleMouse()
         )
         
         # ---------- CAMERA ----------
