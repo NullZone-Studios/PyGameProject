@@ -148,7 +148,7 @@ class Showcase(GameBuilder):
         content = panel.AddChild(UI.Element("content"))
         content1 = panel.AddChild(UI.Element("content"))
         content2 = panel.AddChild(UI.Button("BIG BUTTON"))
-        content2.OnClick = lambda event: print(f"BIG BUTTON HAS BEEN CLICKED!")
+        content2.AddEventListener("OnClick", lambda event: print(f"BIG BUTTON HAS BEEN CLICKED!"))
         content.style = UI.Style(
             width=200,
             height=50,
