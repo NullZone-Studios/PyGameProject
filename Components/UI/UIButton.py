@@ -14,13 +14,3 @@ class Button(Element):
             verticalAlign="middle"
         )
         self.cursor = cursors.Cursor(pygame.SYSTEM_CURSOR_HAND)
-        
-    def HandleEvent(self, event: Event):
-        if event.type == EventType.MOUSE_ENTER:
-            print(f"Mouse Entered Button")
-        elif event.type == EventType.MOUSE_LEAVE:
-            print(f"Mouse Left Button")
-        else:
-            return super().HandleEvent(event)
-            
-        return True

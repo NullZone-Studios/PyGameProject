@@ -2,6 +2,8 @@ import pygame
 from typing import Optional
 
 class Style:
+    PSEUDO_FIELDS = ("hover", "active", "focus")
+    
     def __init__(
         self,
         position: Optional[str] = None,
@@ -26,7 +28,10 @@ class Style:
         color: Optional[pygame.Color] = None,
         font: Optional[pygame.Font] = None,
         textAlign: Optional[str] = None,
-        verticalAlign: Optional[str] = None
+        verticalAlign: Optional[str] = None,
+        hover: Optional["Style"] = None,
+        active: Optional["Style"] = None,
+        focus: Optional["Style"] = None
         ):
         self.position = position
         self.display = display
@@ -51,3 +56,34 @@ class Style:
         self.font = font
         self.textAlign = textAlign
         self.verticalAlign = verticalAlign
+        self.hover = hover
+        self.active = active
+        self.focus = focus
+        
+    def ApplyOverride(self, override: "Style"):
+        if not override:
+            return
+        
+        for attribute, value in vars(override).items():
+            if attribute in Style.PSEUDO_FIELDS:
+                continue
+            
+            if value is not None:
+                setattr(self, attribute, value)
+                
+    def ResolveShorthand(self):
+        if self.borderRadius is not None:
+            if self.borderRadiusTopLeft is None:
+                self.borderRadiusTopLeft = self.borderRadius
+            if self.borderRadiusTopRight is None:
+                self.borderRadiusTopRight = self.borderRadius
+            if self.borderRadiusBottomLeft is None:
+                self.borderRadiusBottomLeft = self.borderRadius
+            if self.borderRadiusBottomRight is None:
+                self.borderRadiusBottomRight = self.borderRadius
+                
+    def Copy(self) -> "Style":
+        copy = Style()
+        for attribute, value in vars(self).items():
+            setattr(copy, attribute, value)
+        return copy

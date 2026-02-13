@@ -1,9 +1,9 @@
 from pygame import Vector2, Surface
-from typing import Optional
+from typing import Optional, Callable
 import pygame
 from .UIStyle import Style
 from .UIResolvedStyle import ResolvedStyle
-from .UIEvent import Event
+from .UIEvent import Event, EventType
 
 
 class Element:
@@ -11,14 +11,45 @@ class Element:
         self.tag = tag
         self.style: Optional[Style] = None
         self.computedStyle: Optional[ResolvedStyle] = None
-        self.children = []
+        self.children: list["Element"] = []
         self.parent: Optional["Element"] = None
 
         self.rectangle: pygame.Rect = pygame.Rect(0, 0, 0, 0)
         self.scrollOffset: Vector2 = Vector2(0, 0)
         self.cursor: pygame.Cursor = None
+        
+        self.states = {key: False for key in Style.PSEUDO_FIELDS}
+        
+        self._OnClick: list[Callable[[Event], None]] = []
+        self._OnMouseEnter: list[Callable[[Event], None]] = []
+        self._OnMouseLeave: list[Callable[[Event], None]] = []
+        self._OnMouseDown: list[Callable[[Event], None]] = []
+        self._OnMouseUp: list[Callable[[Event], None]] = []
+        self._OnHover: list[Callable[[Event], None]] = []
+        self._OnDrag: list[Callable[[Event], None]] = []
+        self._OnFocus: list[Callable[[Event], None]] = []
+        self._OnBlur: list[Callable[[Event], None]] = []
 
-        self.depth = 0
+    def AddEventListener(self, eventName: str, callback: Callable[[Event], None]):
+        """Subscribe a callback to an event"""
+        lst: list = getattr(self, f"_{eventName}", None)
+        if lst is not None:
+            lst.append(callback)
+        else:
+            raise ValueError(f"No such event: {eventName}")
+        
+    def RemoveEventListener(self, eventName: str, callback: Callable[[Event], None]):
+        """Unsubscribe a callback from an event"""
+        lst: list = getattr(self, f"_{eventName}", None)
+        if lst is not None and callback in lst:
+            lst.remove(callback)
+
+    def SetState(self, state: str, value: bool):
+        if state in self.states and self.states[state] != value:
+            self.states[state] = value
+            self.ResolveStyle(
+                self.parent.computedStyle if self.parent else None
+            )
 
     def AddChild(self, child: "Element") -> "Element":
         child.parent = self
@@ -31,23 +62,14 @@ class Element:
             self.children.remove(child)
             
     def Query(self, elementType: Optional[type] = None, tag: Optional[str] = None) -> Optional["Element"]:
-        if elementType and tag:
-            if isinstance(self, elementType) and self.tag == tag:
-                return self
-            for child in self.children:
-                return child.Query(elementType = elementType, tag = tag)
-        elif elementType:
-            if isinstance(self, elementType):
-                return self
-            for child in self.children:
-                return child.Query(elementType = elementType)
-        elif tag:
-            if self.tag == tag:
-                return self
-            for child in self.children:
-                return child.Query(tag = tag)
-        else:
-            return None
+        if (elementType is None or isinstance(self, elementType)) and (tag is None or self.tag == tag):
+            return self
+        for child in self.children:
+            result = child.Query(elementType, tag)
+            if result:
+                return result
+        return None
+
         
     def Q(self, elementType: Optional[type] = None, tag: Optional[str] = None):
         return self.Query(elementType = elementType, tag = tag)
@@ -66,8 +88,7 @@ class Element:
         )
 
     def ResolveStyle(self, base: Optional[Style] = None):
-        self.computedStyle = ResolvedStyle(base=base, override=self.style)
-
+        self.computedStyle = ResolvedStyle(base=base, override=self.style, states=self.states)
         for child in self.children:
             child.ResolveStyle(self.computedStyle)
 
@@ -319,6 +340,31 @@ class Element:
         return self
     
     def HandleEvent(self, event: Event) -> bool:
-        if not event.stopped and self.parent:
+        if event.stopped:
+            return True
+
+        eventMapping = {
+            EventType.MOUSE_ENTER: ("hover", True, "_OnMouseEnter"),
+            EventType.MOUSE_LEAVE: ("hover", False, "_OnMouseLeave"),
+            EventType.MOUSE_DOWN: ("active", True, "_OnMouseDown"),
+            EventType.MOUSE_UP: ("active", False, "_OnMouseUp"),
+            EventType.FOCUS: ("focus", True, "_OnFocus"),
+            EventType.BLUR: ("focus", False, "_OnBlur"),
+            EventType.MOUSE_CLICK: (None, None, "_OnClick"),
+            EventType.MOUSE_MOVE: (None, None, "_OnHover"),
+            EventType.MOUSE_DRAG: (None, None, "_OnDrag")
+        }
+        
+        if event.type in eventMapping:
+            stateKey, stateValue, callbackName = eventMapping[event.type]
+            if stateKey:
+                self.SetState(stateKey, stateValue)
+            callbacks: list = getattr(self, callbackName)
+            for callback in callbacks:
+                callback(event)
+            return bool(callbacks)
+            
+        if self.parent and not event.stopped:
             return self.parent.HandleEvent(event)
+
         return False

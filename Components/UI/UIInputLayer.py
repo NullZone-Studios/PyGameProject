@@ -9,6 +9,7 @@ class UILayer(InputLayer):
         self.canvas = canvas
         self.lastMousePos: Optional[Vector2] = None
         self.hovered: Optional["Element"] = None
+        self.focused: Optional["Element"] = None
         self.pressed: bool = False
 
     def HandleEvent(self, event: InputEvent):
@@ -72,6 +73,12 @@ class UILayer(InputLayer):
         # button up
         elif event.state == ButtonState.RELEASED:
             if self.hovered:
+                if self.focused and self.focused != self.hovered:
+                    e = Event(EventType.BLUR)
+                    event.consumed = self.focused.HandleEvent(e)
+                self.focused = self.hovered
+                e = Event(EventType.FOCUS)
+                event.consumed = self.focused.HandleEvent(e)
                 e = Event(EventType.MOUSE_UP, position=pos)
                 event.consumed = self.hovered.HandleEvent(e)
                 e = Event(EventType.MOUSE_CLICK, position=pos)

@@ -26,4 +26,7 @@ class EventType:
     MOUSE_UP = "mouseup"
     MOUSE_DRAG = "mousedrag"
     MOUSE_CLICK = "mouseclick"
+    MOUSE_MOVE = "mousemove"
+    FOCUS = "focus"
+    BLUR = "blur"
     
