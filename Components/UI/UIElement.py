@@ -19,24 +19,16 @@ class Element:
         self.cursor: pygame.Cursor = None
         
         self.states = {key: False for key in Style.PSEUDO_FIELDS}
-        
-        self._OnClick: list[Callable[[Event], None]] = []
-        self._OnMouseEnter: list[Callable[[Event], None]] = []
-        self._OnMouseLeave: list[Callable[[Event], None]] = []
-        self._OnMouseDown: list[Callable[[Event], None]] = []
-        self._OnMouseUp: list[Callable[[Event], None]] = []
-        self._OnHover: list[Callable[[Event], None]] = []
-        self._OnDrag: list[Callable[[Event], None]] = []
-        self._OnFocus: list[Callable[[Event], None]] = []
-        self._OnBlur: list[Callable[[Event], None]] = []
+        self._listeners: dict[str, dict[str, Callable[[Event], None]]] = {}
 
-    def AddEventListener(self, eventName: str, callback: Callable[[Event], None]):
-        """Subscribe a callback to an event"""
-        lst: list = getattr(self, f"_{eventName}", None)
-        if lst is not None:
-            lst.append(callback)
-        else:
-            raise ValueError(f"No such event: {eventName}")
+    def AddEventListener(self, eventType: str, callback: Callable[[Event], None], capture: bool = False):
+        if eventType not in self._listeners:
+            self._listeners[eventType] = {
+                "capture": [],
+                "bubble": []
+            }
+        phase = "capture" if capture else "bubble"
+        self._listeners[eventType][phase].append(callback)
         
     def RemoveEventListener(self, eventName: str, callback: Callable[[Event], None]):
         """Unsubscribe a callback from an event"""
@@ -339,32 +331,64 @@ class Element:
             
         return self
     
-    def HandleEvent(self, event: Event) -> bool:
-        if event.stopped:
-            return True
-
+    def buildPath(self):
+        path = []
+        node = self
+        while node:
+            path.append(node)
+            node = node.parent
+        return list(reversed(path))
+    
+    def DispatchEvent(self, event: Event):
+        self.updateStateBasedOnEvent(event)
+        event.target = self
+        path = self.buildPath()
+        
+        for node in path[:-1]:
+            node.updateStateBasedOnEvent(event)
+            if event.stopped:
+                return
+            event.currentTarget = node
+            listeners = node._listeners.get(event.type, {})
+            for callback in listeners.get("capture", []):
+                callback(event)
+                if event.immediateStopped:
+                    return
+        
+        if not event.stopped:
+            event.currentTarget = self
+            listeners = self._listeners.get(event.type, {})
+            
+            for callback in listeners.get("capture", []):
+                callback(event)
+                if event.immediateStopped:
+                    return
+            
+            for callback in listeners.get("bubble", []):
+                callback(event)
+                if event.immediateStopped:
+                    return
+                    
+        for node in reversed(path[:-1]):
+            if event.stopped:
+                return
+            event.currentTarget = node
+            listeners = node._listeners.get(event.type, {})
+            for callback in listeners.get("bubble", []):
+                callback(event)
+                if event.immediateStopped:
+                    return
+    
+    def updateStateBasedOnEvent(self, event: Event):
         eventMapping = {
-            EventType.MOUSE_ENTER: ("hover", True, "_OnMouseEnter"),
-            EventType.MOUSE_LEAVE: ("hover", False, "_OnMouseLeave"),
-            EventType.MOUSE_DOWN: ("active", True, "_OnMouseDown"),
-            EventType.MOUSE_UP: ("active", False, "_OnMouseUp"),
-            EventType.FOCUS: ("focus", True, "_OnFocus"),
-            EventType.BLUR: ("focus", False, "_OnBlur"),
-            EventType.MOUSE_CLICK: (None, None, "_OnClick"),
-            EventType.MOUSE_MOVE: (None, None, "_OnHover"),
-            EventType.MOUSE_DRAG: (None, None, "_OnDrag")
+            EventType.MOUSE_ENTER: {"hover", True},
+            EventType.MOUSE_LEAVE: {"hover", False},
+            EventType.MOUSE_DOWN: {"active", True},
+            EventType.MOUSE_UP: {"active", False},
+            EventType.FOCUS: {"focus", True},
+            EventType.BLUR: {"focus", False}
         }
         
         if event.type in eventMapping:
-            stateKey, stateValue, callbackName = eventMapping[event.type]
-            if stateKey:
-                self.SetState(stateKey, stateValue)
-            callbacks: list = getattr(self, callbackName)
-            for callback in callbacks:
-                callback(event)
-            return bool(callbacks)
-            
-        if self.parent and not event.stopped:
-            return self.parent.HandleEvent(event)
-
-        return False
+            value, state = eventMapping[event.type]
+            self.SetState(state, value)

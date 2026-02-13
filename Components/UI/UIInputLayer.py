@@ -1,5 +1,7 @@
+from __future__ import annotations
 from GameEssentials.Input import InputLayer, InputEvent, DeviceType, ButtonState, MouseCodes
 from .UIEvent import Event, EventType
+from .UIElement import Element
 from pygame import Vector2, mouse, cursors
 import pygame
 from typing import Optional
@@ -7,80 +9,113 @@ from typing import Optional
 class UILayer(InputLayer):
     def __init__(self, canvas: "Canvas"):
         self.canvas = canvas
-        self.lastMousePos: Optional[Vector2] = None
-        self.hovered: Optional["Element"] = None
-        self.focused: Optional["Element"] = None
+        self.lastMousePosition: Optional[Vector2] = None
+        self.hovered: Optional[Element] = None
+        self.active: Optional[Element] = None
+        self.focused: Optional[Element] = None
         self.pressed: bool = False
-
-    def HandleEvent(self, event: InputEvent):
+        
+    def DispatchEvent(self, event: InputEvent):
         if event.device != DeviceType.MOUSE:
             return
-
-        # --- get current mouse position ---
-        pos = Vector2(event.position) if event.position else None
-
-        canvasRoot = self.canvas.root
-
-        # --- MOUSE MOVE ---
-        if event.code == MouseCodes.MOVE and pos:  # reserved code for mouse move
-            # hover detection
-            hoverTarget = canvasRoot.HitTest(pos)
-            if hoverTarget != self.hovered:
-                if self.hovered:
-                    e = Event(EventType.MOUSE_LEAVE, position=pos)
-                    event.consumed = self.hovered.HandleEvent(e)
-                if hoverTarget:
-                    e = Event(EventType.MOUSE_ENTER, position=pos)
-                    event.consumed = hoverTarget.HandleEvent(e)
-                self.hovered = hoverTarget
-                
-                # --- Cursor changing ---
-                if self.hovered and self.hovered.cursor:
-                    mouse.set_cursor(self.hovered.cursor)
-                elif self.hovered and self.hovered.parent and self.hovered.parent.cursor:
-                    mouse.set_cursor(self.hovered.parent.cursor)
-                else:
-                    mouse.set_cursor(cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW))
-
-            # drag detection
-            if self.lastMousePos:
-                delta = pos - self.lastMousePos
-                if self.pressed and delta.length_squared() > 0 and self.hovered:
-                    e = Event(EventType.MOUSE_DRAG, position=pos, delta=delta)
-                    event.consumed = self.hovered.HandleEvent(e)
-
-            self.lastMousePos = pos
-            return  # handled move event
-
-        # --- SCROLL WHEEL ---
-        if event.code == MouseCodes.SCROLL and event.delta:  # reserved code for wheel
-            if self.hovered:
-                e = Event(EventType.MOUSE_SCROLL, delta=event.delta, position=pos)
-                event.consumed = self.hovered.HandleEvent(e)
-            return  # handled scroll
-
-        # --- BUTTON EVENTS (click, down, up) ---
-        if not pos or event.state is None:
+        
+        position = Vector2(event.position) if event.position else None
+        root = self.canvas.root
+        
+        if event.code == MouseCodes.MOVE and position:
+            self.handleMouseMove(event, position, root)
             return
-
-        # button down
+        
+        if event.code == MouseCodes.SCROLL:
+            self.handleScroll(event, position)
+            return
+        
+        if position and event.state is not None:
+            self.handleButton(event, position)
+            
+    def handleMouseMove(self, event: InputEvent, position: Vector2, root: Element):
+        newHover = root.HitTest(position)
+        
+        self.updateHover(event, position, newHover)
+        self.handleDrag(event, position)
+        self.lastMousePosition = position
+        
+    def updateHover(self, event: InputEvent, position: Vector2, newHover: Optional[Element]):
+        if newHover == self.hovered:
+            return
+        
+        if self.hovered:
+            self.dispatch(self.hovered, EventType.MOUSE_LEAVE, event, position=position)
+            
+        if newHover:
+            self.dispatch(newHover, EventType.MOUSE_ENTER, event, position=position)
+            
+        self.hovered = newHover
+        self.updateCursor()
+    
+    def updateCursor(self):
+        element: Optional[Element] = self.hovered
+        while element:
+            if element.cursor:
+                mouse.set_cursor(element.cursor)
+                return
+            element = element.parent
+        
+        mouse.set_cursor(cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW))
+        
+    def handleDrag(self, event: InputEvent, position: Vector2):
+        if not self.pressed or not self.active or not self.lastMousePosition:
+            return
+        
+        delta: Vector2 = position - self.lastMousePosition
+        if delta.length_squared() == 0:
+            return
+        
+        self.dispatch(self.active, EventType.MOUSE_DRAG, event, position=position, delta=delta)
+        
+    def handleScroll(self, event: InputEvent, position: Optional[Vector2]):
+        position = position or Vector2(0,0)
+        if not self.hovered:
+            return
+        
+        self.dispatch(self.hovered, EventType.MOUSE_SCROLL, event, position=position, delta=event.delta)
+        
+    def handleButton(self, event: InputEvent, position: Vector2):
         if event.state == ButtonState.PRESSED:
-            if self.hovered:
-                e = Event(EventType.MOUSE_DOWN, position=pos)
-                event.consumed = self.hovered.HandleEvent(e)
-            self.pressed = True
-
-        # button up
+            self.handleMouseDown(event, position)
         elif event.state == ButtonState.RELEASED:
-            if self.hovered:
-                if self.focused and self.focused != self.hovered:
-                    e = Event(EventType.BLUR)
-                    event.consumed = self.focused.HandleEvent(e)
-                self.focused = self.hovered
-                e = Event(EventType.FOCUS)
-                event.consumed = self.focused.HandleEvent(e)
-                e = Event(EventType.MOUSE_UP, position=pos)
-                event.consumed = self.hovered.HandleEvent(e)
-                e = Event(EventType.MOUSE_CLICK, position=pos)
-                event.consumed = self.hovered.HandleEvent(e)
+            self.handleMouseUp(event, position)
+            
+    def handleMouseDown(self, event: InputEvent, position: Vector2):
+        if not self.hovered:
+            return
+        self.active = self.hovered
+        self.pressed = True
+        
+        self.dispatch(self.active, EventType.MOUSE_DOWN, event, position=position)
+        
+    def handleMouseUp(self, event: InputEvent, position: Vector2):
+        if not self.active:
             self.pressed = False
+            return
+        
+        if self.focused and self.focused != self.active:
+            self.dispatch(self.focused, EventType.BLUR, event)
+            
+        self.focused = self.active
+        self.dispatch(self.active, EventType.FOCUS, event)
+        
+        self.dispatch(self.active, EventType.MOUSE_UP, event, position=position)
+        
+        if self.active == self.hovered:
+            self.dispatch(self.active, EventType.MOUSE_CLICK, event, position=position)
+            
+        self.active = None
+        self.pressed = False
+        
+    def dispatch(self, target: Element, eventType: str, inputEvent: InputEvent, **kwargs):
+        e = Event(eventType, **kwargs)
+        target.DispatchEvent(e)
+        inputEvent.consumed |= e.stopped
+                
+            

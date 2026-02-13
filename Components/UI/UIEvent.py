@@ -11,9 +11,18 @@ class Event:
         self.currentTarget: Optional["Element"] = None
         
         self.stopped = False
+        self.immediateStopped = False
+        self.defaultPrevented = False
         
     def StopPropagation(self):
         self.stopped = True
+        
+    def StopImmediatePropagation(self):
+        self.immediateStopped = True
+        self.stopped = True
+        
+    def PreventDefault(self):
+        self.defaultPrevented = True
         
     @property
     def propagationStopped(self):
@@ -27,6 +36,7 @@ class EventType:
     MOUSE_DRAG = "mousedrag"
     MOUSE_CLICK = "mouseclick"
     MOUSE_MOVE = "mousemove"
+    MOUSE_SCROLL = "mousescroll"
     FOCUS = "focus"
     BLUR = "blur"
     

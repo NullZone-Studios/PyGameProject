@@ -1,5 +1,5 @@
 from .inputEvent import InputEvent
 
 class InputLayer:
-    def HandleEvent(self, event: InputEvent):
+    def DispatchEvent(self, event: InputEvent):
         pass

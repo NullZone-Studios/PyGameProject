@@ -90,7 +90,7 @@ class InputSystem:
             
     def dispatch(self, event: InputEvent):
         for layer in self.layers:
-            layer.HandleEvent(event)
+            layer.DispatchEvent(event)
             
             if event.consumed:
                 break
