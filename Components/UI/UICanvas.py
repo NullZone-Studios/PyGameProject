@@ -16,10 +16,11 @@ class Canvas(Component):
         self.color = color
         self.worldSpace = worldSpace
         self.layer = layer
+        self.inputSystem = inputSystem
         
-        if inputSystem:
-            inputSystem.AddLayer(UILayer(self))
-        
+    def Start(self):
+        self.inputSystem.AddLayer(UILayer(self))
+        return super().Start()
         
     
     @property

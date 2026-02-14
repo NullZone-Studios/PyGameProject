@@ -13,7 +13,7 @@ import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat
+from Builder.ShowcaseScripts import Rotator, Move, Cat, GameInputLayer
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(100,100,100)
@@ -27,10 +27,15 @@ class Showcase(GameBuilder):
     
     def Build(self, engine):
         gameObjects = engine.world.GameObjects
+        InputHandler = GameInputLayer()
+        engine.input.AddLayer(InputHandler)
+        
+        # --- Basic Controlls ---
+        InputHandler.AddKeyEvent(pygame.K_ESCAPE, Input.ButtonState.PRESSED, self.ToggleMouse)
         
         # ---------- CAMERA ----------
         cameraObject = GameObject("MainCamera", "Camera")
-        #cameraObject.AddComponent(Move())
+        cameraObject.AddComponent(Move(InputHandler))
         cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(AudioListener())
         gameObjects.append(cameraObject)
@@ -142,12 +147,15 @@ class Showcase(GameBuilder):
             flexDirection="row",
             gap=8,
             background=pygame.Color(0,0,0,0),
-            font=pygame.font.SysFont("sans-serif", 32)
+            font=pygame.font.SysFont("sans-serif", 32),
+            padding = (5)
         )
         
         content = panel.AddChild(UI.Element("content"))
         content1 = panel.AddChild(UI.Element("content"))
         content2 = panel.AddChild(UI.Button("BIG BUTTON"))
+        content3 = panel.AddChild(UI.Button("BIGGER BUTTON"))
+        content3.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: print(f"BIGGER BUTTON CLICKED!"))
         content2.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: print(f"BIG BUTTON HAS BEEN CLICKED!"))
         content2.Q(tag="buttonLabel").Text = "SMALL BUTTON"
         content.style = UI.Style(
@@ -162,6 +170,7 @@ class Showcase(GameBuilder):
         )
         content1.style = content.style
         content2.style = content.style
+        content3.style = content.style
         
         badge = panel.AddChild(UI.Element("badge"))
         badge.style = UI.Style(

@@ -14,6 +14,7 @@ class UILayer(InputLayer):
         self.active: Optional[Element] = None
         self.focused: Optional[Element] = None
         self.pressed: bool = False
+        self.priority = -1
         
     def DispatchEvent(self, event: InputEvent):
         if event.device != DeviceType.MOUSE:

@@ -1,7 +1,7 @@
 from pygame import Vector2, Surface
 from typing import Optional, Callable
 import pygame
-from .UIStyle import Style
+from .UIStyle import Style, BoxSpacing
 from .UIResolvedStyle import ResolvedStyle
 from .UIEvent import Event, EventType
 
@@ -86,6 +86,8 @@ class Element:
 
     def Layout(self, available: pygame.Rect):
         style = self.computedStyle
+        padding = style.padding
+        margin = style.margin
 
         def LayoutBlock():
             cursorY = 0
@@ -95,16 +97,20 @@ class Element:
                         pygame.Rect(0, 0, self.rectangle.width, self.rectangle.height)
                     )
                     continue
-
+                
+                padding = style.padding
+                
                 child.Layout(
                     pygame.Rect(
-                        0,
-                        cursorY,
-                        self.rectangle.width,
-                        self.rectangle.height - cursorY,
+                        padding.left,
+                        padding.top + cursorY,
+                        self.rectangle.width - padding.left - padding.right,
+                        self.rectangle.height - padding.top - padding.bottom - cursorY,
                     )
                 )
-                cursorY += child.rectangle.height
+                
+                childMargin = child.computedStyle.margin
+                cursorY += child.rectangle.height + childMargin.top + childMargin.bottom
             if style.height is None:
                 self.rectangle.height = cursorY
 
@@ -133,9 +139,14 @@ class Element:
                         if child.computedStyle.height is not None
                         else self.rectangle.height
                     )
-                    child.Layout(pygame.Rect(cursor, 0, childWidth, childHeight))
+                    childMargin = child.computedStyle.margin or BoxSpacing()
+                    child.Layout(pygame.Rect(
+                        padding.left + cursor + childMargin.left,
+                        padding.top + childMargin.top, 
+                        childWidth, 
+                        childHeight))
 
-                    cursor += childWidth + gap
+                    cursor += childWidth + gap + childMargin.left + childMargin.right
                     maxHeight = max(maxHeight, childHeight)
                 if self.computedStyle.height is None:
                     self.rectangle.height = maxHeight
@@ -162,20 +173,27 @@ class Element:
                         if child.computedStyle.height is not None
                         else 0
                     )
+                    childMargin = child.computedStyle.margin or BoxSpacing()
+                    child.Layout(pygame.Rect(
+                        padding.left + childMargin.left, 
+                        padding.top + cursor + childMargin.top, 
+                        childWidth, 
+                        childHeight))
 
-                    child.Layout(pygame.Rect(0, cursor, childWidth, childHeight))
-
-                    cursor += childHeight + gap
+                    cursor += childHeight + gap + childMargin.top + childMargin.bottom
                     maxWidth = max(maxWidth, childWidth)
 
                 if self.computedStyle.width is None:
                     self.rectangle.width = maxWidth
 
-        width = style.width if style.width is not None else available.width
-        height = style.height if style.height is not None else available.height
+        marginX = margin.left + margin.right
+        marginY = margin.top + margin.bottom
 
-        x = available.x
-        y = available.y
+        width = style.width if style.width is not None else available.width - marginX
+        height = style.height if style.height is not None else available.height - marginY
+
+        x = available.x + margin.left
+        y = available.y + margin.top
 
         if style.position == "absolute":
             x = style.left if style.left is not None else 0
@@ -214,10 +232,10 @@ class Element:
                 border_bottom_right_radius=style.borderRadiusBottomRight or 0,
             )
 
-        if style.borderWidth and style.borderWidth > 0:
+        if style.borderWidth and style.borderWidth > 0 and style.borderColor:
             pygame.draw.rect(
                 surface,
-                style.borderColor or pygame.Color("white"),
+                style.borderColor,
                 rectangle,
                 width=style.borderWidth,
                 border_top_left_radius=style.borderRadiusTopLeft or 0,

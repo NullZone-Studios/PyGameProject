@@ -15,6 +15,7 @@ class InputSystem:
         
     def AddLayer(self, layer: InputLayer):
         self.layers.append(layer)
+        self.layers.sort(key=lambda l:l.priority)
         
     def RemoveLayer(self, layer: InputLayer):
         self.layers.remove(layer)

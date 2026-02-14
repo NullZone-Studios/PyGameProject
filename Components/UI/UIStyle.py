@@ -1,5 +1,6 @@
 import pygame
 from typing import Optional
+from .Style import BoxSpacing
 
 class Style:
     PSEUDO_FIELDS = ("hover", "active", "focus")
@@ -29,6 +30,8 @@ class Style:
         font: Optional[pygame.Font] = None,
         textAlign: Optional[str] = None,
         verticalAlign: Optional[str] = None,
+        padding: int | tuple[int, int] | tuple[int, int ,int ,int] | None = None,
+        margin: int | tuple[int, int] | tuple[int, int ,int ,int] | None = None,
         hover: Optional["Style"] = None,
         active: Optional["Style"] = None,
         focus: Optional["Style"] = None
@@ -40,7 +43,7 @@ class Style:
         self.overflow = overflow
         self.background = background
         self.borderColor = borderColor
-        self.borderWidth = borderWidth
+        self.borderWidth = borderWidth or 0
         self.borderRadius = borderRadius
         self.borderRadiusTopLeft = borderRadiusTopLeft
         self.borderRadiusTopRight = borderRadiusTopRight
@@ -59,6 +62,8 @@ class Style:
         self.hover = hover
         self.active = active
         self.focus = focus
+        self.padding = BoxSpacing.from_value(padding)
+        self.margin = BoxSpacing.from_value(margin)
         
     def ApplyOverride(self, override: "Style"):
         if not override:
