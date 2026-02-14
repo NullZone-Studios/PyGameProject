@@ -4,6 +4,7 @@ from .cat import Cat
 from .collisionLogger import CollisionLogger
 from .turretShooter import CrystalTurret
 from .GameInput import GameInputLayer
+from .positionToLabel import PositionToLabel
 
 __all__=[
     "Rotator",
@@ -11,5 +12,6 @@ __all__=[
     "Cat",
     "CollisionLogger",
     "CrystalTurret",
-    "GameInputLayer"
+    "GameInputLayer",
+    "PositionToLabel"
 ]

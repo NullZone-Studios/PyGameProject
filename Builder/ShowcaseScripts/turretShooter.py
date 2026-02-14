@@ -1,7 +1,6 @@
 import math
 import pygame
-from GameEssentials import GameObject
-from GameWorld import GameWorld
+from GameEssentials import GameObject, GameWorld
 from Components import BoxCollider, ShapeRenderer, Script
 
 
@@ -78,9 +77,9 @@ class CrystalTurret(Script):
         return self.base_fire_interval / (1.01 ** self._elapsed)
 
     def _get_target(self) -> GameObject | None:
-        if GameWorld.MainCamera:
-            return GameWorld.MainCamera.GameObject
-        return GameWorld.FindByTag("Camera")
+        if GameWorld.GetInstance().MainCamera:
+            return GameWorld.GetInstance().MainCamera.GameObject
+        return GameWorld.GetInstance().FindByTag("Camera")
 
     def _aim_at(self, direction: pygame.Vector3):
         yaw = math.atan2(direction.x, direction.z)
@@ -107,6 +106,6 @@ class CrystalTurret(Script):
                 owner=self.GameObject,
             )
         )
-        GameWorld.Instantiate(projectile)
+        GameWorld.GetInstance().Instantiate(projectile)
         projectile.Awake()
         projectile.Start()

@@ -1,8 +1,7 @@
 from typing import Dict, List, Set, Tuple
-from GameWorld import GameWorld
 from Components.collider import BoxCollider
 from GameEssentials.gameObject import GameObject
-
+from GameEssentials.gameWorld import GameWorld
 class CollisionSystem:
     _previous_pairs: Set[Tuple[int, int]] = set()
     _last_colliders: List[BoxCollider] = []

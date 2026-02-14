@@ -19,7 +19,8 @@ class Canvas(Component):
         self.inputSystem = inputSystem
         
     def Start(self):
-        self.inputSystem.AddLayer(UIInputLayer(self))
+        if self.inputSystem:
+            self.inputSystem.AddLayer(UIInputLayer(self))
         return super().Start()
         
     

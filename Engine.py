@@ -13,7 +13,7 @@ class Engine:
         pygame.display.set_caption(game.TITLE)
         self.running = False
         self.renderQueue = []
-        self.world = GameWorld()
+        self.world = GameWorld.GetInstance()
         self.renderer = Renderer()
     
     def Run(self):

@@ -16,7 +16,7 @@ import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer
+from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color("blue")
@@ -135,3 +135,15 @@ class Showcase(GameBuilder):
         # spriteObject.AddComponent(DebugColliderRenderer())
         # spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
         # gameObjects.append(spriteObject)
+        
+        uiObject = GameObject("UI", "Overlay")
+        canvas: UI.Canvas = uiObject.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem=engine.input))
+        positionLabel = canvas.root.AddChild(UI.Label("positionLabel", "position"))
+        positionLabel.style = UI.Style(
+            font=pygame.font.SysFont("Aria", 32),
+            padding=5
+        )
+        gameObjects.append(uiObject)
+        
+        
+        cameraObject.AddComponent(PositionToLabel(positionLabel))

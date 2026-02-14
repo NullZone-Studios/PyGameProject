@@ -4,8 +4,20 @@ from Components import Camera
 from typing import Optional
 
 class GameWorld:
+    instance: "GameWorld" = None
+    
+    @staticmethod
+    def GetInstance() -> "GameWorld":
+        if GameWorld.instance is None:
+            GameWorld()
+        return GameWorld.instance
+    
     def __init__(self):
+        if GameWorld.instance is not None:
+            raise Exception("GameWorld is a singleton! use GetInstance()")
+        GameWorld.instance = self
         self.GameObjects: list[GameObject] = []
+        GameWorld.GameObjects = self.GameObjects
         self.MainCamera: Optional[Camera] = None
     
     def Awaken(self):
@@ -27,6 +39,11 @@ class GameWorld:
             if obj.Name == name:
                 return obj
         return None
+    
+    def Instantiate(self, gameObject: GameObject):
+        gameObject.Awake()
+        gameObject.Start()
+        self.GameObjects.append(gameObject)
         
     def FindMainCamera(self) -> Optional[Component]:
         if self.MainCamera:
@@ -36,6 +53,7 @@ class GameWorld:
             camera = obj.GetComponent(Camera)
             if camera:
                 self.MainCamera = camera
+                GameWorld.MainCamera = camera
                 return camera
         return None
     
