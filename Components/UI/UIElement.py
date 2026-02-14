@@ -399,14 +399,14 @@ class Element:
     
     def updateStateBasedOnEvent(self, event: Event):
         eventMapping = {
-            EventType.MOUSE_ENTER: {"hover", True},
-            EventType.MOUSE_LEAVE: {"hover", False},
-            EventType.MOUSE_DOWN: {"active", True},
-            EventType.MOUSE_UP: {"active", False},
-            EventType.FOCUS: {"focus", True},
-            EventType.BLUR: {"focus", False}
+            EventType.MOUSE_ENTER: ("hover", True),
+            EventType.MOUSE_LEAVE: ("hover", False),
+            EventType.MOUSE_DOWN: ("active", True),
+            EventType.MOUSE_UP: ("active", False),
+            EventType.FOCUS: ("focus", True),
+            EventType.BLUR: ("focus", False)
         }
         
         if event.type in eventMapping:
-            value, state = eventMapping[event.type]
+            state, value = eventMapping[event.type]
             self.SetState(state, value)

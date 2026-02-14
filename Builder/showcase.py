@@ -53,6 +53,8 @@ class Showcase(GameBuilder):
         cube.AddComponent(Rotator())
         gameObjects.append(cube)
 
+        engine.world
+
         # shorthand
         c = pygame.Color(1, 255, 255)
         s = 1.0  # half-size

@@ -4,8 +4,6 @@ from Components import Camera
 from typing import Optional
 
 class GameWorld:
-    MainCamera: Camera = None
-    
     def __init__(self):
         self.GameObjects: list[GameObject] = []
         self.MainCamera: Optional[Camera] = None

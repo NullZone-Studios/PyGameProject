@@ -6,7 +6,7 @@ from typing import Callable
 import pygame
 import numpy as np
 from .UIEvent import Event
-from .UIInputLayer import UILayer
+from .UIInput import UIInputLayer
 
 class Canvas(Component):
     def __init__(self, width: int = 100, height: int = 100, layer: int = 0, color: pygame.Color = pygame.Color(0,0,0,0), worldSpace: bool = False, inputSystem = None):
@@ -19,7 +19,7 @@ class Canvas(Component):
         self.inputSystem = inputSystem
         
     def Start(self):
-        self.inputSystem.AddLayer(UILayer(self))
+        self.inputSystem.AddLayer(UIInputLayer(self))
         return super().Start()
         
     

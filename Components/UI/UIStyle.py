@@ -7,6 +7,7 @@ class Style:
     
     def __init__(
         self,
+        visibility: Optional[str] = None,
         position: Optional[str] = None,
         display: Optional[str] = None,
         flexDirection: Optional[str] = None,
@@ -34,8 +35,10 @@ class Style:
         margin: int | tuple[int, int] | tuple[int, int ,int ,int] | None = None,
         hover: Optional["Style"] = None,
         active: Optional["Style"] = None,
-        focus: Optional["Style"] = None
+        focus: Optional["Style"] = None,
+        cursor: Optional[pygame.cursors.Cursor] = None
         ):
+        self.visibility = visibility
         self.position = position
         self.display = display
         self.flexDirection = flexDirection
@@ -43,7 +46,7 @@ class Style:
         self.overflow = overflow
         self.background = background
         self.borderColor = borderColor
-        self.borderWidth = borderWidth or 0
+        self.borderWidth = borderWidth
         self.borderRadius = borderRadius
         self.borderRadiusTopLeft = borderRadiusTopLeft
         self.borderRadiusTopRight = borderRadiusTopRight
@@ -64,10 +67,13 @@ class Style:
         self.focus = focus
         self.padding = BoxSpacing.from_value(padding)
         self.margin = BoxSpacing.from_value(margin)
+        self.cursor = cursor
         
     def ApplyOverride(self, override: "Style"):
         if not override:
             return
+        
+        overridables = ("color", "font", "textAlign", "verticalAlign", "cursor", "visibility")
         
         for attribute, value in vars(override).items():
             if attribute in Style.PSEUDO_FIELDS:

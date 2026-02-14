@@ -6,7 +6,7 @@ from pygame import Vector2, mouse, cursors
 import pygame
 from typing import Optional
 
-class UILayer(InputLayer):
+class UIInputLayer(InputLayer):
     def __init__(self, canvas: "Canvas"):
         self.canvas = canvas
         self.lastMousePosition: Optional[Vector2] = None
