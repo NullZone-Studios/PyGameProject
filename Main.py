@@ -1,3 +1,7 @@
 import Builder
+import Engine
+
 game = Builder.Showcase()
-game.Start()
+engine = Engine.Engine(game)
+game.Build(engine)
+engine.Run()

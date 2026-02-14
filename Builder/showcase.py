@@ -1,4 +1,4 @@
-from GameEssentials import GameObject, InputSystem, ButtonStateBind, SoundEngine
+from GameEssentials import GameObject, Input, SoundEngine
 from Components import (
     Transform,
     Camera,
@@ -12,11 +12,11 @@ from Components import (
     DebugColliderRenderer,
     ShapeRenderer
 )
+import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret
-from Builder.ShowcaseScripts import CollisionLogger
+from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color("blue")
@@ -24,16 +24,23 @@ class Showcase(GameBuilder):
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
     
-    def Build(self, gameObjects: list[GameObject]):
-        InputSystem.GetInstance().KeyBindings[pygame.K_ESCAPE] = ButtonStateBind(
-            pressed= lambda _: pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
-        )
+    def ToggleMouse(self):
+        pygame.mouse.set_pos((self.RESOLUTION.x/2, self.RESOLUTION.y/2))
+        pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
+    
+    def Build(self, engine):
+        gameObjects = engine.world.GameObjects
+        InputHandler = GameInputLayer()
+        engine.input.AddLayer(InputHandler)
+        
+        # --- Basic Controlls ---
+        InputHandler.AddKeyEvent(pygame.K_ESCAPE, Input.ButtonState.PRESSED, self.ToggleMouse)
         
         # ---------- CAMERA ----------
         cameraObject = GameObject("MainCamera", "Camera")
-        cameraObject.AddComponent(Move())
         cameraObject.AddComponent(CollisionLogger(pygame.Vector3(1.5, 1.5, 1.5), "Camera"))
         cameraObject.AddComponent(DebugColliderRenderer())
+        cameraObject.AddComponent(Move(InputHandler))
         cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(AudioListener())
         cameraObject.AddComponent(PointLight(pygame.Color("green"), 1))

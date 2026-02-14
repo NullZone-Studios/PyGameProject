@@ -1,5 +1,5 @@
 from typing import Optional
-from GameEssentials import GameObject
+from GameEssentials import GameObject, Input
 from Engine import Engine
 import pygame
 
@@ -8,9 +8,10 @@ class GameBuilder:
     BACKGROUND_COLOR: pygame.Color = pygame.Color(0,0,0)
     ICON: pygame.Surface = pygame.image.load("src/images/weird_cat.png")
     TITLE: str = "Game"
+        
+    @property
+    def World(self) -> list[GameObject]:
+        return
     
-    def Build(self, gameObjects: list[GameObject]):
+    def Build(self):
         pass
-    
-    def Start(self):
-        Engine.Run(self)
