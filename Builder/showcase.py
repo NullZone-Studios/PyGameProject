@@ -48,9 +48,8 @@ class Showcase(GameBuilder):
 
         # ---------- LIGHT ----------
         lightObject = GameObject("Sun", "Light")
-        lightObject.AddComponent(
-            DirectionalLight(color= pygame.Color(255,255,255), intensity=.8)
-        )
+        #lightObject.AddComponent(DirectionalLight(color= pygame.Color(255,255,255), intensity=.8))
+        lightObject.AddComponent(PointLight(color= pygame.Color(200,200,200), intensity=.7, range=100))
         gameObjects.append(lightObject)
 
         # ---------- CUBE ----------
@@ -73,6 +72,12 @@ class Showcase(GameBuilder):
         crystalTurret1.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
         gameObjects.append(crystalTurret1)
 
+        # ---------- CRYSTAL TURRET1 BASE ----------
+        crystalTurret1Base = GameObject("CrystalBase", "Geometry")
+        crystalTurret1Base.Transform.Position = pygame.Vector3(-20, -5, 20)
+        crystalTurret1Base.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(210, 60, 60), scale=(1,3.5,1), offset=(0,-0.5,0)))
+        gameObjects.append(crystalTurret1Base)
+    
         # ---------- CRYSTAL TURRET2 ----------
         crystalTurret2 = GameObject("Crystal", "Geometry")
         crystalTurret2.Transform.Position = pygame.Vector3(-20, 0, -20)
@@ -82,6 +87,12 @@ class Showcase(GameBuilder):
         crystalTurret2.AddComponent(Rotator())
         crystalTurret2.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
         gameObjects.append(crystalTurret2)
+
+        # ---------- CRYSTAL TURRET2 BASE ----------
+        crystalTurret2Base = GameObject("CrystalBase", "Geometry")
+        crystalTurret2Base.Transform.Position = pygame.Vector3(-20, -5, -20)
+        crystalTurret2Base.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(210, 60, 60), scale=(1,3.5,1), offset=(0,-0.5,0)))
+        gameObjects.append(crystalTurret2Base)
 
         # ---------- CRYSTAL TURRET3 ----------
         crystalTurret3 = GameObject("Crystal", "Geometry")
@@ -93,6 +104,12 @@ class Showcase(GameBuilder):
         crystalTurret3.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
         gameObjects.append(crystalTurret3)
 
+        # ---------- CRYSTAL TURRET3 BASE ----------
+        crystalTurret3Base = GameObject("CrystalBase", "Geometry")
+        crystalTurret3Base.Transform.Position = pygame.Vector3(20, -5, -20)
+        crystalTurret3Base.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(210, 60, 60), scale=(1,3.5,1), offset=(0,-0.5,0)))
+        gameObjects.append(crystalTurret3Base)
+
         # ---------- CRYSTAL TURRET4 ----------
         crystalTurret4 = GameObject("Crystal", "Geometry")
         crystalTurret4.Transform.Position = pygame.Vector3(20, 0, 20)
@@ -102,11 +119,17 @@ class Showcase(GameBuilder):
         crystalTurret4.AddComponent(Rotator())
         crystalTurret4.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
         gameObjects.append(crystalTurret4)
+
+        # ---------- CRYSTAL TURRET4 BASE ----------
+        crystalTurret4Base = GameObject("CrystalBase", "Geometry")
+        crystalTurret4Base.Transform.Position = pygame.Vector3(20, -5, 20)
+        crystalTurret4Base.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(210, 60, 60), scale=(1,3.5,1), offset=(0,-0.5,0)))
+        gameObjects.append(crystalTurret4Base)
         
         # ---------- GROUND ----------
         groundObject = GameObject("Ground", "Face")
-        groundObject.Transform.Translate(y=-10)
-        face = groundObject.AddComponent(Face(100,100))
+        groundObject.Transform.Translate(y=-30)
+        face = groundObject.AddComponent(Face(90,90, pygame.Color(80,200,80)))
         groundLightObject = GameObject("GroundLight", "Light")
         groundLightObject.Transform.Translate(y=2)
         groundLightObject.AddComponent(PointLight(intensity=.8))
@@ -117,13 +140,27 @@ class Showcase(GameBuilder):
         skyObject = GameObject("Sky", "Face")
         skyObject.Transform.Translate(y=50)
         skyObject.Transform.Rotate(pitch=np.pi)
-        face = skyObject.AddComponent(Face(1000,1000, pygame.Color(200,200,255)))
+        face = skyObject.AddComponent(Face(1000,1000, pygame.Color(180,180,240)))
         gameObjects.append(skyObject)
         
         skyLightObject = GameObject("skyLight", "Light", skyObject)
         skyLightObject.Transform.Translate(y=2)
         skyLightObject.Transform.Rotate(pitch=-np.pi/2)
         skyLightObject.AddComponent(PointLight(intensity=.8))
+
+        # ---------- Mountains ----------
+        mountainObject = GameObject("Mountain", "Geometry")
+        mountainObject.Transform.Translate(0,0,0)
+        mountainObject.Transform.Scale = pygame.Vector3(2,2,2)
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(160, 150, 135), scale=(25, 13, 15), offset=(55, 2.9, 15)))
+        mountainObject.AddComponent(Face(25, 15, pygame.Color(160, 150, 135)))
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 155, 145), scale=(25, 17, 15), offset=(55, 6.9, -15)))
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 160, 165), scale=(20, 15, 25), offset=(10, 4.9, 55)))
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(165, 140, 155), scale=(10, 10, 25), offset=(-20, -0.1, 55)))
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 160, 145), scale=(25, 13, 30), offset=(-55, 2.9, 0)))
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(155, 145, 155), scale=(20, 15, 25), offset=(10, 4.9, -55)))
+        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(160, 155, 140), scale=(10, 10, 25), offset=(-20, -0.1, -55)))
+        gameObjects.append(mountainObject)
         
         # ---------- MEOW :D ----------
         # spriteObject = GameObject("Sprite1", "Sprite")
