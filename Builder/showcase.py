@@ -153,7 +153,6 @@ class Showcase(GameBuilder):
         mountainObject.Transform.Translate(0,0,0)
         mountainObject.Transform.Scale = pygame.Vector3(2,2,2)
         mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(160, 150, 135), scale=(25, 13, 15), offset=(55, 2.9, 15)))
-        mountainObject.AddComponent(Face(25, 15, pygame.Color(160, 150, 135)))
         mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 155, 145), scale=(25, 17, 15), offset=(55, 6.9, -15)))
         mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 160, 165), scale=(20, 15, 25), offset=(10, 4.9, 55)))
         mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(165, 140, 155), scale=(10, 10, 25), offset=(-20, -0.1, 55)))
