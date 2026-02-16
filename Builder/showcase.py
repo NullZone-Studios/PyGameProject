@@ -19,7 +19,7 @@ import numpy as np
 from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster
 
 class Showcase(GameBuilder):
-    BACKGROUND_COLOR = pygame.Color("blue")
+    BACKGROUND_COLOR = pygame.Color(200,200,255)
     TITLE = "Showcase "
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
@@ -128,25 +128,14 @@ class Showcase(GameBuilder):
         
         # ---------- GROUND ----------
         groundObject = GameObject("Ground", "Face")
-        groundObject.Transform.Translate(y=-30)
-        face = groundObject.AddComponent(Face(90,90, pygame.Color(80,200,80)))
+        groundObject.Transform.Translate(y=-90)
+        face = groundObject.AddComponent(Face(500,500, pygame.Color(80,200,80)))
         groundLightObject = GameObject("GroundLight", "Light")
         groundLightObject.Transform.Translate(y=2)
         groundLightObject.AddComponent(PointLight(intensity=.8))
         groundObject.AddChild(groundLightObject)
         gameObjects.append(groundObject)
         
-        # ---------- SKYBOX ----------
-        skyObject = GameObject("Sky", "Face")
-        skyObject.Transform.Translate(y=50)
-        skyObject.Transform.Rotate(pitch=np.pi)
-        face = skyObject.AddComponent(Face(1000,1000, pygame.Color(180,180,240)))
-        gameObjects.append(skyObject)
-        
-        skyLightObject = GameObject("skyLight", "Light", skyObject)
-        skyLightObject.Transform.Translate(y=2)
-        skyLightObject.Transform.Rotate(pitch=-np.pi/2)
-        skyLightObject.AddComponent(PointLight(intensity=.8))
 
         # ---------- Mountains ----------
         mountainObject = GameObject("Mountain", "Geometry")
