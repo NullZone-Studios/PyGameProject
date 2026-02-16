@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from GameEssentials import GameObject, GameWorld
+from GameEssentials import GameObject
 
 class GameMaster:
     
@@ -36,12 +36,14 @@ class GameMaster:
 
     @property
     def Instance(self) -> GameMaster:
+        from GameEssentials import GameMaster
         if GameMaster._instance is None:
             GameMaster._instance = GameMaster()
         return GameMaster._instance
 
     @property
     def gameObjects(self) -> list[GameObject]:
+        from GameEssentials import GameMaster
         return GameWorld.GetInstance().GameObjects
 
     def AddObject(self, obj: GameObject) -> None:
