@@ -1,11 +1,16 @@
 from __future__ import annotations
 
-from GameEssentials import GameObject
+import random
+import pygame
+from pygame import Vector3
 
-class GameMaster:
-    
-    _instance = None
-    
+from showcase import CollisionLogger, Rotator
+from GameEssentials import GameObject, GameWorld
+from Components import ShapeRenderer,  DebugColliderRenderer, Script
+from .turretShooter import CrystalTurret
+
+class GameMaster(Script):
+
     def __init__(
         self,
         boss_wave_interval: int = 5,
@@ -15,6 +20,7 @@ class GameMaster:
         final_wave: int = 10,
         max_difficulty: float | None = None,
     ) -> None:
+        super().__init__()
         self.currentWave = 0
         self.starting_difficulty = max(0.0, starting_difficulty)
         self.difficulty = self.starting_difficulty
@@ -32,18 +38,26 @@ class GameMaster:
         self.is_running = False
         self.is_paused = False
         self.is_game_over = False
+        self.base_enemies_per_wave = 2
+        self.enemies_per_wave_growth = 1
+        self.enemies_per_difficulty = 2.0
+        self.base_spawn_interval = 2.0
+        self.min_spawn_interval = 0.4
+        self.max_spawn_interval = 4.0
+        self.max_active_enemies_base = 2
+        self.max_active_enemies_per_difficulty = 1.0
+        self.time_until_next_enemy_spawn = 0.0
+        self.spawnLocations = {
+            "top": Vector3(0, 20, 20),
+            "bottom": Vector3(0, -20, 20),
+            "left": Vector3(-20, 0, 20),
+            "right": Vector3(20, 0, 20),
+        }
+        self.currentScore = 0
         self._ApplyDifficultyCap()
 
     @property
-    def Instance(self) -> GameMaster:
-        from GameEssentials import GameMaster
-        if GameMaster._instance is None:
-            GameMaster._instance = GameMaster()
-        return GameMaster._instance
-
-    @property
     def gameObjects(self) -> list[GameObject]:
-        from GameEssentials import GameMaster
         return GameWorld.GetInstance().GameObjects
 
     def AddObject(self, obj: GameObject) -> None:
@@ -67,6 +81,7 @@ class GameMaster:
         self.difficulty = self.starting_difficulty
         self.is_boss_wave = False
         self.boss_alive = False
+        self.StartWave()
 
     def Pause(self) -> None:
         if self.is_running and not self.is_game_over:
@@ -86,13 +101,13 @@ class GameMaster:
             self.EndGame()
             return
 
-        self.currentWave += 1
+        self.IncreaseCurrentWave(1)
         self.is_boss_wave = self._ShouldStartBossWave(self.currentWave)
 
         if self.is_boss_wave:
             self.StartBossBattle()
         else:
-            self.SpawnWaveEnemies()
+            self.PrepareWaveEnemies()
 
     def EndWave(self) -> None:
         if self.is_boss_wave:
@@ -149,9 +164,23 @@ class GameMaster:
     def DecreaseStartingDifficulty(self, amount: float = 0.1) -> None:
         self.SetStartingDifficulty(self.starting_difficulty - max(0.0, amount))
 
-    def SpawnWaveEnemies(self) -> None:
-        # Placeholder hook for enemy/turret/projectile systems.
-        pass
+    def PrepareWaveEnemies(self) -> None:
+        self.yet_to_spawn_turrets.clear()
+
+        target_enemy_count = max(
+            1,
+            int(
+                self.base_enemies_per_wave
+                + (self.currentWave * self.enemies_per_wave_growth)
+                + (self.difficulty * self.enemies_per_difficulty)
+            ),
+        )
+
+        for _ in range(target_enemy_count):
+            self.yet_to_spawn_turrets.append(self._BuildWaveTurret())
+
+        self.time_until_next_enemy_spawn = self._CalculateNextSpawnDelay(self._GetActiveEnemyCount())
+        self._TrySpawnNextEnemy()
 
     def StartBossBattle(self) -> None:
         self.boss_alive = True
@@ -186,9 +215,63 @@ class GameMaster:
         if self.max_difficulty is not None:
             self.difficulty = min(self.difficulty, self.max_difficulty)
 
-    def Update(self, deltaTime: float) -> None:
+    def _BuildWaveTurret(self) -> GameObject:
+        spawn_name = random.choice(list(self.spawnLocations.keys()))
+        turret = GameObject(f"WaveTurret_{self.currentWave}_{len(self.yet_to_spawn_turrets)}", "Enemy")
+        turret.Transform.Position = Vector3(self.spawnLocations[spawn_name])
+        turret.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Crystal"))
+        turret.AddComponent(DebugColliderRenderer())
+        turret.AddComponent(Rotator())
+        turret.AddComponent(CrystalTurret(fire_interval=max(0.5, 2.5 / max(1.0, self.difficulty))))
+        turret.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(220, 245, 255)))
+        return turret
+
+    def _GetActiveEnemyCount(self) -> int:
+        return len(self.spawnedWaveTurrets)
+
+    def _MaxActiveEnemies(self) -> int:
+        return max(
+            1,
+            int(self.max_active_enemies_base + (self.difficulty * self.max_active_enemies_per_difficulty)),
+        )
+
+    def _CalculateNextSpawnDelay(self, active_enemies: int) -> float:
+        difficulty_scale = max(0.35, 1.0 / (1.0 + (self.difficulty * 0.4)))
+        active_enemy_penalty = 1.0 + (active_enemies * 0.25)
+        delay = self.base_spawn_interval * difficulty_scale * active_enemy_penalty
+        return max(self.min_spawn_interval, min(delay, self.max_spawn_interval))
+
+    def _TrySpawnNextEnemy(self) -> None:
+        if not self.yet_to_spawn_turrets:
+            return
+
+        if self._GetActiveEnemyCount() >= self._MaxActiveEnemies():
+            return
+
+        next_turret = self.yet_to_spawn_turrets.pop(0)
         for obj in self.spawnedWaveTurrets:
             if obj._destroyed:
-                self.spawnedWaveTurrets.remove(obj)
-        
+                continue
+            if obj.Transform.Position == next_turret.Transform.Position:
+                self.yet_to_spawn_turrets.insert(0, next_turret)
+                return
+        self.AddObject(next_turret)
+        self.time_until_next_enemy_spawn = self._CalculateNextSpawnDelay(self._GetActiveEnemyCount())
+
+    def Update(self, deltaTime: float) -> None:
+        self.spawnedWaveTurrets = [obj for obj in self.spawnedWaveTurrets if not obj._destroyed]
+
+        if not self.is_running or self.is_paused or self.is_game_over:
+            return
+
+        if self.is_boss_wave:
+            return
+
+        if not self.yet_to_spawn_turrets:
+            return
+
+        self.time_until_next_enemy_spawn -= deltaTime
+        if self.time_until_next_enemy_spawn <= 0:
+            self._TrySpawnNextEnemy()
+
         return
