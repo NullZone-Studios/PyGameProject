@@ -1,8 +1,11 @@
 from __future__ import annotations
 
-from GameEssentials import GameObject
+from GameEssentials import GameObject, GameWorld
 
 class GameMaster:
+    
+    _instance = None
+    
     def __init__(
         self,
         boss_wave_interval: int = 5,
@@ -13,13 +16,15 @@ class GameMaster:
         max_difficulty: float | None = None,
     ) -> None:
         self.currentWave = 0
-        self.starting_difficulty = starting_difficulty
-        self.difficulty = starting_difficulty
-        self.wave_difficulty_increase = wave_difficulty_increase
-        self.boss_difficulty_increase = boss_difficulty_increase
+        self.starting_difficulty = max(0.0, starting_difficulty)
+        self.difficulty = self.starting_difficulty
+        self.wave_difficulty_increase = max(0.0, wave_difficulty_increase)
+        self.boss_difficulty_increase = max(0.0, boss_difficulty_increase)
         self.boss_wave_interval = boss_wave_interval
+        self.spawnedWaveTurrets: list[GameObject] = []
+        self.yet_to_spawn_turrets: list[GameObject] = []
         self.final_wave: int | None = final_wave if final_wave > 0 else None
-        self.max_difficulty: float | None = max_difficulty
+        self.max_difficulty: float | None = max(0.0, max_difficulty) if max_difficulty is not None else None
         self.normal_waves_completed = 0
         self.boss_waves_completed = 0
         self.is_boss_wave = False
@@ -27,20 +32,25 @@ class GameMaster:
         self.is_running = False
         self.is_paused = False
         self.is_game_over = False
+        self._ApplyDifficultyCap()
+
+    @property
+    def Instance(self) -> GameMaster:
+        if GameMaster._instance is None:
+            GameMaster._instance = GameMaster()
+        return GameMaster._instance
 
     @property
     def gameObjects(self) -> list[GameObject]:
-        from GameWorld import GameWorld
-        return GameWorld.GameObjects
+        return GameWorld.GetInstance().GameObjects
 
     def AddObject(self, obj: GameObject) -> None:
-        from GameWorld import GameWorld
-
-        if obj not in GameWorld.GameObjects:
-            GameWorld.Instantiate(obj)
+        if obj not in GameWorld.GetInstance().GameObjects:
+            GameWorld.GetInstance().Instantiate(obj)
             obj.Awake()
             obj.Start()
-
+            self.spawnedWaveTurrets.append(obj)
+            
     def RemoveObject(self, obj: GameObject) -> None:
         if obj in self.gameObjects:
             obj.Destroy()
@@ -95,20 +105,47 @@ class GameMaster:
             self.EndGame()
 
     def SetWaveLimit(self, final_wave: int) -> None:
-        self.final_wave = final_wave if final_wave > 0 else None
+        self.final_wave = max(1, final_wave)
+        if self.currentWave > self.final_wave:
+            self.currentWave = self.final_wave
 
     def SetInfiniteWaves(self) -> None:
         self.final_wave = None
+
+    def SetCurrentWave(self, wave: int) -> None:
+        bounded_wave = max(0, wave)
+        if self.final_wave is not None:
+            bounded_wave = min(bounded_wave, self.final_wave)
+        self.currentWave = bounded_wave
+
+    def IncreaseCurrentWave(self, amount: int = 1) -> None:
+        self.SetCurrentWave(self.currentWave + max(0, amount))
+
+    def DecreaseCurrentWave(self, amount: int = 1) -> None:
+        self.SetCurrentWave(self.currentWave - max(0, amount))
 
     def HasReachedFinalWave(self) -> bool:
         return self.final_wave is not None and self.currentWave >= self.final_wave
 
     def SetMaxDifficulty(self, max_difficulty: float | None) -> None:
-        self.max_difficulty = max_difficulty
+        self.max_difficulty = max(0.0, max_difficulty) if max_difficulty is not None else None
         self._ApplyDifficultyCap()
 
     def SetInfiniteDifficulty(self) -> None:
         self.max_difficulty = None
+
+    def SetStartingDifficulty(self, difficulty: float) -> None:
+        bounded_difficulty = max(0.0, difficulty)
+        if self.max_difficulty is not None:
+            bounded_difficulty = min(bounded_difficulty, self.max_difficulty)
+        self.starting_difficulty = bounded_difficulty
+        self._RecalculateDifficulty()
+
+    def IncreaseStartingDifficulty(self, amount: float = 0.1) -> None:
+        self.SetStartingDifficulty(self.starting_difficulty + max(0.0, amount))
+
+    def DecreaseStartingDifficulty(self, amount: float = 0.1) -> None:
+        self.SetStartingDifficulty(self.starting_difficulty - max(0.0, amount))
 
     def SpawnWaveEnemies(self) -> None:
         # Placeholder hook for enemy/turret/projectile systems.
@@ -148,6 +185,8 @@ class GameMaster:
             self.difficulty = min(self.difficulty, self.max_difficulty)
 
     def Update(self, deltaTime: float) -> None:
-        # Engine.Update owns object update + culling.
-        # GameMaster.Update is reserved for high-level game state logic only.
+        for obj in self.spawnedWaveTurrets:
+            if obj._destroyed:
+                self.spawnedWaveTurrets.remove(obj)
+        
         return
