@@ -36,7 +36,7 @@ class Move(Script):
         
     def Update(self, deltaTime: float):
         transform: Transform = self.GameObject.Transform
-        localDirection = np.array([self.movementDirection.x, self.movementDirection.y, self.movementDirection.z])
+        localDirection = np.array([self.movementDirection.x, self.movementDirection.y, self.movementDirection.z, 0])
         worldDirection = transform.ComputeRotationMatrix() @ localDirection
         
         transform.Translate(

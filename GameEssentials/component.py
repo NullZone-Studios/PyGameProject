@@ -7,9 +7,11 @@ class Component:
         
     def Enable(self):
         self.Enabled = True
+        self.OnEnable()
     
     def Disable(self):
         self.Enabled = False
+        self.OnDisable()
     
     def OnEnable(self):
         return
