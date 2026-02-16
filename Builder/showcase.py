@@ -174,7 +174,8 @@ class Showcase(GameBuilder):
         
         #--------------GAME MASTER----------------
         gogm = GameObject("GameMaster", "Logic")
-        gm = gogm.AddComponent(GameMaster())
+        gm = GameMaster()
+        gogm.AddComponent(gm)
         gameObjects.append(gogm)
         
         # ---------- UI ----------
