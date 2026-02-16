@@ -36,8 +36,19 @@ class Canvas(Component):
             
     def PrepareSurface(self):
         self.surface.fill(self.color)
+        
+    def Disable(self):
+        self.root.visible = False
+        return super().Disable()
+    
+    def Enable(self):
+        self.root.visible = True
+        return super().Enable()
     
     def GetRenderData(self, camera: Camera, lights: list[Light]):
+        if not self.Enabled:
+            return None
+        
         self.PrepareSurface()
         self.root.ResolveStyle(None)
         self.root.Layout(pygame.Rect(0,0, *self.surface.get_size()))

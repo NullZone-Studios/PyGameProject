@@ -20,6 +20,7 @@ class Element:
         
         self.states = {key: False for key in Style.PSEUDO_FIELDS}
         self._listeners: dict[str, dict[str, Callable[[Event], None]]] = {}
+        self.visible = True
 
     def AddEventListener(self, eventType: str, callback: Callable[[Event], None], capture: bool = False):
         if eventType not in self._listeners:
@@ -247,6 +248,8 @@ class Element:
     def Render(self, surface: pygame.Surface, parentClip: Optional[pygame.Rect] = None, offset: Optional[Vector2] = None):
         if not self.computedStyle:
             return
+        if not self.visible:
+            return
         
         offset = offset if offset is not None else Vector2(0,0)
         
@@ -317,6 +320,8 @@ class Element:
 
     def HitTest(self, point: Vector2, offset: Optional[Vector2] = None) -> Optional["Element"]:
         if not self.computedStyle:
+            return None
+        if not self.visible:
             return None
         
         offset = offset if offset is not None else Vector2(0,0)

@@ -147,7 +147,7 @@ class GameObject:
         
         for component in self.Components:
             if component.Enabled:
-                component.OnEnable()
+                component.Enable()
             
         for child in self.Children[:]:
             child.Enable()
@@ -159,7 +159,7 @@ class GameObject:
         self.Enabled = False
         
         for component in self.Components:
-            component.OnDisable()
+            component.Disable()
         
         for child in self.Children[:]:
             child.Disable()
