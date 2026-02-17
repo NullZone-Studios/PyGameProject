@@ -43,6 +43,10 @@ class Transform(Component):
         self.Position.z += z
         self.markDirty()
         
+    def SetPosition(self, position: Vector3):
+        self.Position = position
+        self.markDirty()
+        
     def SetRotation(self, rotation: Vector3):
         self.Rotation = Vector3(
             rotation.x % self.TWO_PI,
@@ -50,6 +54,18 @@ class Transform(Component):
             rotation.z % self.TWO_PI
         )
         self.markDirty(rotation=True)
+        
+    def LookAt(self, target: Vector3):
+        direction = target - self.WorldPosition
+        if direction.length() == 0:
+            return
+        direction.normalize_ip()
+        
+        # Calculate yaw and pitch
+        yaw = np.arctan2(direction.x, direction.z)
+        pitch = np.arcsin(-direction.y)
+        
+        self.SetRotation(Vector3(pitch, yaw, self.Rotation.z))
         
     def Rotate(self, pitch: float = 0, yaw: float =0, roll: float =0):
         self.Rotation.x = (self.Rotation.x+pitch) % self.TWO_PI

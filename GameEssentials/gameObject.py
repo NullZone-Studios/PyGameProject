@@ -5,6 +5,7 @@ from .component import Component
 from Components.transform import Transform
 from typing import Optional, Type, TypeVar, Generic
 from pygame import Vector2
+import copy 
 
 T = TypeVar("T", bound=Component)
 
@@ -168,3 +169,13 @@ class GameObject:
         self._destroyed = True
         for child in self.Children:
             child.Destroy()
+            
+    def Clone(self) -> "GameObject":
+        clone = GameObject(self.Name, self.Tag)
+        for component in self.Components:
+            clone.AddComponent(copy.copy(component))
+        
+        for child in self.Children:
+            clone.AddChild(child.Clone())
+        
+        return clone

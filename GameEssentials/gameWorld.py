@@ -32,12 +32,20 @@ class GameWorld:
         for obj in self.GameObjects:
             if obj.Tag == tag:
                 return obj
+            if obj.Children:
+                for child in obj.Children:
+                    if child.Tag == tag:
+                        return child
         return None
     
     def FindByName(self, name: str) -> Optional[GameObject]:
         for obj in self.GameObjects:
             if obj.Name == name:
                 return obj
+            if obj.Children:
+                for child in obj.Children:
+                    if child.Name == name:
+                        return child
         return None
     
     def Instantiate(self, gameObject: GameObject):
@@ -55,6 +63,13 @@ class GameWorld:
                 self.MainCamera = camera
                 GameWorld.MainCamera = camera
                 return camera
+            if obj.Children:
+                for child in obj.Children:
+                    camera = child.GetComponent(Camera)
+                    if camera:
+                        self.MainCamera = camera
+                        GameWorld.MainCamera = camera
+                        return camera
         return None
     
     def Update(self, deltaTime: float):

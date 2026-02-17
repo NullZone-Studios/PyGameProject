@@ -19,7 +19,7 @@ import numpy as np
 from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster
 
 class Showcase(GameBuilder):
-    BACKGROUND_COLOR = pygame.Color(200,200,255)
+    BACKGROUND_COLOR = pygame.Color(0,0,0)
     TITLE = "Showcase "
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
@@ -38,18 +38,17 @@ class Showcase(GameBuilder):
         
         # ---------- CAMERA ----------
         cameraObject = GameObject("MainCamera", "Camera")
+        cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(CollisionLogger(pygame.Vector3(1.5, 1.5, 1.5), "Camera"))
         cameraObject.AddComponent(DebugColliderRenderer())
         cameraObject.AddComponent(Move(InputHandler))
-        cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
         cameraObject.AddComponent(AudioListener())
-        cameraObject.AddComponent(PointLight(pygame.Color("green"), 1))
         gameObjects.append(cameraObject)
 
         # ---------- LIGHT ----------
         lightObject = GameObject("Sun", "Light")
         #lightObject.AddComponent(DirectionalLight(color= pygame.Color(255,255,255), intensity=.8))
-        lightObject.AddComponent(PointLight(color= pygame.Color(200,200,200), intensity=.7, range=100))
+        lightObject.AddComponent(PointLight(color= pygame.Color(200,200,200), intensity=.7, range=1000))
         gameObjects.append(lightObject)
 
         # ---------- CUBE ----------
@@ -126,40 +125,6 @@ class Showcase(GameBuilder):
         crystalTurret4Base.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(210, 60, 60), scale=(1,3.5,1), offset=(0,-0.5,0)))
         gameObjects.append(crystalTurret4Base)
         
-        # ---------- GROUND ----------
-        groundObject = GameObject("Ground", "Face")
-        groundObject.Transform.Translate(y=-90)
-        face = groundObject.AddComponent(Face(500,500, pygame.Color(80,200,80)))
-        groundLightObject = GameObject("GroundLight", "Light")
-        groundLightObject.Transform.Translate(y=2)
-        groundLightObject.AddComponent(PointLight(intensity=.8))
-        groundObject.AddChild(groundLightObject)
-        gameObjects.append(groundObject)
-        
-
-        # ---------- Mountains ----------
-        mountainObject = GameObject("Mountain", "Geometry")
-        mountainObject.Transform.Translate(0,0,0)
-        mountainObject.Transform.Scale = pygame.Vector3(2,2,2)
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(160, 150, 135), scale=(25, 13, 15), offset=(55, 2.9, 15)))
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 155, 145), scale=(25, 17, 15), offset=(55, 6.9, -15)))
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 160, 165), scale=(20, 15, 25), offset=(10, 4.9, 55)))
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(165, 140, 155), scale=(10, 10, 25), offset=(-20, -0.1, 55)))
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(150, 160, 145), scale=(25, 13, 30), offset=(-55, 2.9, 0)))
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(155, 145, 155), scale=(20, 15, 25), offset=(10, 4.9, -55)))
-        mountainObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(160, 155, 140), scale=(10, 10, 25), offset=(-20, -0.1, -55)))
-        gameObjects.append(mountainObject)
-        
-        # ---------- MEOW :D ----------
-        # spriteObject = GameObject("Sprite1", "Sprite")
-        # spriteObject.Transform.Translate(-5,0,-5)
-        # spriteObject.Transform.SetScale(pygame.Vector3(50,50,50))
-        # spriteObject.AddComponent(AudioSource("meow", "src/sound/purr.wav"))
-        # spriteObject.AddComponent(Cat())
-        # spriteObject.AddComponent(CollisionLogger(pygame.Vector3(0.05, 0.05, 0.05), "CatSprite"))
-        # spriteObject.AddComponent(DebugColliderRenderer())
-        # spriteObject.AddComponent(SpriteRenderer("src/images/weird_cat.png"))
-        # gameObjects.append(spriteObject)
         
         #--------------GAME MASTER----------------
         gogm = GameObject("GameMaster", "Logic")
@@ -177,6 +142,24 @@ class Showcase(GameBuilder):
         )
         gameObjects.append(uiObject)
         
-
+        startMenuUI = GameObject("StartMenuUI", "Overlay")
+        gameObjects.append(startMenuUI)
+        startMenuUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem= engine.input))
+        
+        starBoxObject = GameObject("StarBox", "World")
+        starBoxObject.Transform.SetScale(pygame.Vector3(10,10,10))
+        starObject = starBoxObject.AddChild(GameObject("Star", "World"))
+        starObject.AddComponent(Face(1,1, pygame.Color("white")))
+        for i in range(20):
+            starBoxObject.AddChild(starObject.Clone())
+        for child in starBoxObject.Children:
+            child.Transform.Position = pygame.Vector3(
+                np.random.uniform(-200,200),
+                np.random.uniform(-200,200),
+                np.random.uniform(-200,200)
+            )
+            child.Transform.LookAt(pygame.Vector3(0,0,0))
+            child.Transform.Rotate(pitch=np.pi/2)
+        gameObjects.append(starBoxObject)
         
         cameraObject.AddComponent(PositionToLabel(positionLabel))
