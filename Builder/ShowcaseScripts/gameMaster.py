@@ -5,7 +5,7 @@ from pygame import Vector3
 
 from Builder.ShowcaseScripts import CollisionLogger, Rotator
 from GameEssentials import GameObject, GameWorld
-from Components import ShapeRenderer,  DebugColliderRenderer, Script
+from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSource
 from .turretShooter import CrystalTurret
 
 class GameMaster(Script):
@@ -46,36 +46,48 @@ class GameMaster(Script):
         self.max_active_enemies_base = 2
         self.max_active_enemies_per_difficulty = 1.0
         self.time_until_next_enemy_spawn = 0.0
+        self.starting_turrets_shooting_delay = 5.0
+        self.cooldown_before_shooting = self._recalculateShootingCooldown()
+        self.currentActiveTurret : CrystalTurret | None = None
         self.spawnLocations = {
-            "top": Vector3(0, 20, 20),
-            "bottom": Vector3(0, -20, 20),
-            "left": Vector3(-20, 0, 20),
+            "top": Vector3(20, 0, -20),
+            "bottom": Vector3(-20, 0, 20),
+            "left": Vector3(-20, 0, -20),
             "right": Vector3(20, 0, 20),
         }
         self._spawn_location_keys = tuple(self.spawnLocations.keys())
         self._active_spawn_slots: set[str] = set()
         self.currentScore = 0
-        self._ApplyDifficultyCap()
 
     @property
     def gameObjects(self) -> list[GameObject]:
         return GameWorld.GetInstance().GameObjects
 
     def AddObject(self, obj: GameObject) -> None:
-        if obj not in GameWorld.GetInstance().GameObjects:
-            GameWorld.GetInstance().Instantiate(obj)
-            self.spawnedWaveTurrets.append(obj)
-            spawn_slot = getattr(obj, "_spawn_slot", None)
-            if isinstance(spawn_slot, str):
-                self._active_spawn_slots.add(spawn_slot)
+        if obj._destroyed or obj in self.spawnedWaveTurrets or self.GameObject is None:
+            return
+        self.GameObject.AddChild(obj)
+        self.spawnedWaveTurrets.append(obj)
+        spawn_slot = getattr(obj, "_spawn_slot", None)
+        if isinstance(spawn_slot, str):
+            self._active_spawn_slots.add(spawn_slot)
             
     def RemoveObject(self, obj: GameObject) -> None:
-        if obj in self.gameObjects:
+        if self.GameObject is not None and obj.Parent is self.GameObject:
+            self.GameObject.RemoveChild(obj)
+        if obj in self.spawnedWaveTurrets:
+            self.spawnedWaveTurrets.remove(obj)
+        spawn_slot = getattr(obj, "_spawn_slot", None)
+        if isinstance(spawn_slot, str):
+            self._active_spawn_slots.discard(spawn_slot)
+        if not obj._destroyed:
             obj.Destroy()
 
     def StartGame(self) -> None:
         # Clean up any leftover enemies from a previous run before resetting state.
         for obj in self.spawnedWaveTurrets:
+            if self.GameObject is not None and obj.Parent is self.GameObject:
+                self.GameObject.RemoveChild(obj)
             if not obj._destroyed:
                 obj.Destroy()
         for obj in self.yet_to_spawn_turrets:
@@ -117,6 +129,7 @@ class GameMaster(Script):
 
         self.IncreaseCurrentWave(1)
         self.is_boss_wave = self._ShouldStartBossWave(self.currentWave)
+        self.cooldown_before_shooting = self._recalculateShootingCooldown()
 
         if self.is_boss_wave:
             self.StartBossBattle()
@@ -127,10 +140,10 @@ class GameMaster(Script):
         
         if self.is_boss_wave:
             self.EndBossBattle()
-            self.currentScore += int(800 * self.difficulty)  # Bonus for defeating boss wave
+            self.currentScore += int(500 * self.difficulty)  # Bonus for defeating boss wave
             self.boss_waves_completed += 1
         else:
-            self.currentScore += int(300 * self.difficulty)  # Bonus for completing normal wave
+            self.currentScore += int(250 * self.difficulty)  # Bonus for completing normal wave
             self.normal_waves_completed += 1
 
         self._RecalculateDifficulty()
@@ -242,8 +255,10 @@ class GameMaster(Script):
         turret.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Crystal"))
         turret.AddComponent(DebugColliderRenderer())
         turret.AddComponent(Rotator())
-        turret.AddComponent(CrystalTurret(fire_interval=max(0.5, 2.5 / max(1.0, self.difficulty))))
-        turret.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(220, 245, 255)))
+        turret.AddComponent(CrystalTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty))))
+        turret.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
+        turret.AddComponent(AudioSource("spawn", "src/sound/spawn_turret.wav"))
+        turret.AddComponent(AudioSource("shoot", "src/sound/shoot_sound.wav"))
         return turret
 
     def _GetActiveEnemyCount(self) -> int:
@@ -274,6 +289,10 @@ class GameMaster(Script):
             self.yet_to_spawn_turrets.appendleft(next_turret)
             return
         self.AddObject(next_turret)
+        audioSources = next_turret.GetAllComponentsOfType(AudioSource)
+        for audioSource in audioSources:
+            if audioSource.soundName == "spawn":
+                audioSource.Play()
         self.time_until_next_enemy_spawn = self._CalculateNextSpawnDelay(self._GetActiveEnemyCount())
 
     def EasyMode(self) -> None:
@@ -294,12 +313,18 @@ class GameMaster(Script):
         self.boss_difficulty_increase = 1.0
         self._RecalculateDifficulty()
     
+    def _recalculateShootingCooldown(self) -> float:
+        return max(0.5, self.starting_turrets_shooting_delay / max(1.0, self.difficulty))
+        
+    
     def Update(self, deltaTime: float) -> None:
         surviving_turrets: list[GameObject] = []
         destroyed_count = 0
         for obj in self.spawnedWaveTurrets:
             if obj._destroyed:
                 destroyed_count += 1
+                if self.GameObject is not None and obj.Parent is self.GameObject:
+                    self.GameObject.RemoveChild(obj)
                 spawn_slot = getattr(obj, "_spawn_slot", None)
                 if isinstance(spawn_slot, str):
                     self._active_spawn_slots.discard(spawn_slot)
@@ -321,6 +346,17 @@ class GameMaster(Script):
         if not self.yet_to_spawn_turrets:
             return
 
+        if len(self.spawnedWaveTurrets) == 0 and len(self.yet_to_spawn_turrets) == 0:
+            self.EndWave()
+            return
+        
+        self.cooldown_before_shooting -= deltaTime
+        if self.cooldown_before_shooting <= 0:
+            self.cooldown_before_shooting = self._recalculateShootingCooldown()
+            if self.spawnedWaveTurrets:
+                random.choice(self.spawnedWaveTurrets).GetFirstComponentOfType(CrystalTurret).Shoot()
+
+        
         self.time_until_next_enemy_spawn -= deltaTime
         if self.time_until_next_enemy_spawn <= 0:
             self._TrySpawnNextEnemy()
