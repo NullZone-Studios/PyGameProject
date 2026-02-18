@@ -36,3 +36,6 @@ class Component:
 
     def OnCollisionExit(self, other):
         return
+    
+    def OnDestroy(self):
+        return

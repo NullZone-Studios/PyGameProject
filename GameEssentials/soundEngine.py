@@ -28,6 +28,8 @@ class SoundEngine:
         self.listenerTransform = listenerTransform
         
     def LoadSFX(self, name: str, path: str):
+        if name in self.sounds :
+            return
         source = oalOpen(path)
         self.sounds[name] = source
         source.set_gain(self.sfxVolume * self.masterVolume)

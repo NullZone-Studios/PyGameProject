@@ -167,6 +167,8 @@ class GameObject:
             
     def Destroy(self):
         self._destroyed = True
+        for component in self.Components:
+            component.OnDestroy()
         for child in self.Children:
             child.Destroy()
             

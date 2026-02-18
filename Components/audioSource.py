@@ -20,6 +20,11 @@ class AudioSource(Component):
         self.source = SoundEngine.GetInstance().PlaySFX3D(self.soundName, transform.WorldPosition)
         if self.loop and self.source:
             self.source.set_looping(True)
+    
+    def Stop(self):
+        if self.source:
+            self.source.stop()
+            self.source = None
 
     def Update(self, deltaTime):
         if not self.source:
