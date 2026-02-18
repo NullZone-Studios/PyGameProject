@@ -68,7 +68,7 @@ class Player(Script):
             self.invulnerability_time -= deltaTime
             
     def OnCollisionEnter(self, other):
-        if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag != "Player":
+        if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag != "Player" and self.invulnerability_time <= 0:
             self.life -= 1
             self.invulnerability_time = 1.0  # Set invulnerability time to 1 second
             print(f"Player hit! Remaining life: {self.life}")
