@@ -150,7 +150,7 @@ class Showcase(GameBuilder):
         # ------ START UI STYLE ----------
         panelStyle = UI.Style(
             font=pygame.font.SysFont("arial", 28),
-            margin=(self.RESOLUTION.y/2,30)
+            height=self.RESOLUTION.y
         )
         
         buttonContinerStyle = UI.Style(

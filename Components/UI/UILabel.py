@@ -6,6 +6,21 @@ class Label(Element):
         super().__init__(tag)
         self.Text = text
         
+    def Layout(self, available):
+        super().Layout(available)
+        style = self.computedStyle
+        if style and style.font:
+            textSurface = style.font.render(
+                text=self.Text,
+                antialias= True,
+                color=style.color or pygame.Color("black"),
+                wraplength=style.width if style.width else available.width
+            )
+            textRect = textSurface.get_rect()
+            self.rectangle.width = textRect.width
+            self.rectangle.height = style.height if style.height else textRect.height
+        
+        
     def Draw(self, surface, rectangle: pygame.Rect):
         super().Draw(surface, rectangle)
 
@@ -13,7 +28,6 @@ class Label(Element):
             return
 
         style = self.computedStyle
-        rect = rectangle
 
         font = style.font or pygame.font.SysFont("sans-serif", 12)
 
@@ -21,23 +35,23 @@ class Label(Element):
             text=self.Text,
             antialias= True,
             color=style.color or pygame.Color("black"),
-            wraplength=self.rectangle.width
+            wraplength=rectangle.width
         )
 
         textRectangle = labelSprite.get_rect()
         
         if style.textAlign == "center":
-            textRectangle.x = rect.x + (rect.width - textRectangle.width) // 2
+            textRectangle.x = rectangle.x + (rectangle.width - textRectangle.width) // 2
         elif style.textAlign == "right":
-            textRectangle.x = rect.x + rect.width - textRectangle.width
+            textRectangle.x = rectangle.x + rectangle.width - textRectangle.width
         else:
-            textRectangle.x = rect.x
+            textRectangle.x = rectangle.x
             
         if style.verticalAlign == "middle":
-            textRectangle.y = rect.y + (rect.height - textRectangle.height) // 2
+            textRectangle.y = rectangle.y + (rectangle.height - textRectangle.height) // 2
         elif style.verticalAlign == "bottom":
-            textRectangle.y = rect.y + rect.height - textRectangle.height
+            textRectangle.y = rectangle.y + rectangle.height - textRectangle.height
         else:
-            textRectangle.y = rect.y
+            textRectangle.y = rectangle.y
         
         surface.blit(labelSprite, textRectangle)

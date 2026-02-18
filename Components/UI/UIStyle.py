@@ -79,7 +79,7 @@ class Style:
             if attribute in Style.PSEUDO_FIELDS:
                 continue
             
-            if value is not None:
+            if value is not None and attribute:
                 setattr(self, attribute, value)
                 
     def ResolveShorthand(self):
