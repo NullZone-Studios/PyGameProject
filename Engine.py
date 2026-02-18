@@ -1,5 +1,6 @@
 import pygame
 from GameEssentials import Input, Renderer, GameWorld
+from GameEssentials.collisionSystem import CollisionSystem
 
 # pygame setup
 class Engine:
@@ -35,6 +36,7 @@ class Engine:
 
             # UPDATE GAME
             self.world.Update(self.clock.get_time() / 1000.0)
+            CollisionSystem.Update()
 
             if not self.world.MainCamera:
                 self.world.FindMainCamera()

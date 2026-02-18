@@ -55,9 +55,9 @@ class GameInputLayer(InputLayer):
                 
         if event.device == DeviceType.MOUSE:
             if event.code in self.mouseMapping and event.state in self.mouseMapping[event.code]:
-                for callback in self.keyboardMapping[event.code][event.state]:
+                for callback in self.mouseMapping[event.code][event.state]:
                     callback(Vector2(event.position))
-                event.consumed = len(self.keyboardMapping[event.code][event.state]) > 0
+                event.consumed = len(self.mouseMapping[event.code][event.state]) > 0
                 
             if event.code == MouseCodes.MOVE:
                 for callback in self.mouseMoveListeners:
@@ -70,6 +70,6 @@ class GameInputLayer(InputLayer):
                 event.consumed = len(self.mouseScrollListeners) > 0
                 
 class MouseKeys:
-    LEFT = 1,
-    RIGHT = 2,
+    LEFT = 1
+    RIGHT = 2
     MIDDLE = 3
