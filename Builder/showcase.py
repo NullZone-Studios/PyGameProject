@@ -51,16 +51,6 @@ class Showcase(GameBuilder):
         lightObject.AddComponent(PointLight(color= pygame.Color(200,200,200), intensity=.7, range=1000))
         gameObjects.append(lightObject)
 
-        # ---------- CUBE ----------
-        # cube = GameObject("Cube", "Geometry")
-        # cube.Transform.Position = pygame.Vector3(5,0,-5)
-        # cube.AddComponent(Rotator())
-        # cube.AddComponent(CollisionLogger(pygame.Vector3(2, 2, 2), "Cube"))
-        # cube.AddComponent(DebugColliderRenderer())
-        # cube.AddComponent(ShapeRenderer("cube", pygame.Color(255,0,0), (1,1,2), (3,0,0)))
-        # cube.AddComponent(ShapeRenderer("cube", pygame.Color(255,0,0), (1,1,2), (-3,0,0)))
-        # gameObjects.append(cube)
-
         # ---------- CRYSTAL TURRET1 ----------
         crystalTurret1 = GameObject("Crystal", "Geometry")
         crystalTurret1.Transform.Position = pygame.Vector3(-20, 0, 20)
@@ -138,14 +128,59 @@ class Showcase(GameBuilder):
         positionLabel = canvas.root.AddChild(UI.Label("positionLabel", "position"))
         positionLabel.style = UI.Style(
             font=pygame.font.SysFont("arial", 32),
-            padding=5
+            padding=5,
+            width=200,
+            height=200,
+            color=pygame.Color("white")
         )
         gameObjects.append(uiObject)
         
+        # ---------- START MENU UI ----------
         startMenuUI = GameObject("StartMenuUI", "Overlay")
         gameObjects.append(startMenuUI)
-        startMenuUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem= engine.input))
+        startMenuCanvas = startMenuUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem= engine.input))
+        panel = startMenuCanvas.root.AddChild(UI.Element("panel"))
+        buttonContainer = panel.AddChild(UI.Element("ButtonContainer"))
+        startButton = buttonContainer.AddChild(UI.Button("Start"))
+        optionsButton = buttonContainer.AddChild(UI.Button("Options"))
+        quitButton = buttonContainer.AddChild(UI.Button("Quit"))
         
+        # ------ START UI STYLE ----------
+        panelStyle = UI.Style(
+            font=pygame.font.SysFont("arial", 28),
+            margin=(self.RESOLUTION.y/2,30)
+        )
+        
+        buttonContinerStyle = UI.Style(
+            display="flex",
+            flexDirection="column",
+            gap=10,
+            padding=20,
+            background=pygame.Color(200,200,200,50),
+            borderRadius=10,
+        )
+        buttonStyle = UI.Style(
+            width=200,
+            height=50,
+            borderWidth=2,
+            borderColor=pygame.Color("gray"),
+            background=pygame.Color("white"),
+            color=pygame.Color("black"),
+            borderRadius=5,
+            hover=UI.Style(
+                background=pygame.Color("black"),
+                borderColor=pygame.Color("white"),
+                color=pygame.Color("white")
+            )
+        )
+        
+        panel.style = panelStyle
+        buttonContainer.style = buttonContinerStyle
+        startButton.style = buttonStyle
+        optionsButton.style = buttonStyle
+        quitButton.style = buttonStyle
+        
+        # ------ STAR FIELD ----------
         starBoxObject = GameObject("StarBox", "World")
         starBoxObject.Transform.SetScale(pygame.Vector3(10,10,10))
         starObject = starBoxObject.AddChild(GameObject("Star", "World"))
