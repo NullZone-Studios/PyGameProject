@@ -1,4 +1,5 @@
 from Builder.ShowcaseScripts.GameInput import GameInputLayer, MouseKeys
+from Builder.ShowcaseScripts.gameMaster import GameMaster
 from Components.script import Script
 import pygame
 
@@ -49,7 +50,7 @@ class Player(Script):
         projectile.AddComponent(
             Projectile(
                 direction=direction,
-                speed=5.0,
+                speed=20.0,
                 lifetime=5.0,
                 owner=self.GameObject,
             )
@@ -67,11 +68,12 @@ class Player(Script):
             self.invulnerability_time -= deltaTime
             
     def OnCollisionEnter(self, other):
-        if other.tag == "Projectile" and other.GetComponent(Projectile).owner.tag != "Player":
+        if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag != "Player":
             self.life -= 1
             self.invulnerability_time = 1.0  # Set invulnerability time to 1 second
             print(f"Player hit! Remaining life: {self.life}")
             if self.life <= 0:
                 print("Player has been destroyed!")
+                GameMaster.CurrentGameMaster.EndGame()  # Assuming there's an EndGame method to handle game over logic
                 # Here you could add logic to handle player death, such as respawning or ending the game.
         return super().OnCollisionEnter(other)

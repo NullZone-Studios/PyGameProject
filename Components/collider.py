@@ -8,7 +8,7 @@ class BoxCollider(Component):
         self.Size = size
         self.Offset = offset or Vector3(0, 0, 0)
         self.IsTrigger = isTrigger
-
+    
     def GetWorldBounds(self) -> Tuple[Vector3, Vector3]:
         transform = self.GameObject.Transform
         scale = transform.Scale

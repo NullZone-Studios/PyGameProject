@@ -4,11 +4,14 @@ import pygame
 from pygame import Vector3
 
 from Builder.ShowcaseScripts import CollisionLogger, Rotator
+from Components.collider import BoxCollider
 from GameEssentials import GameObject, GameWorld
 from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSource
 from .turretShooter import CrystalTurret, RimTurret, BaseTurret
 
 class GameMaster(Script):
+
+    CurrentGameMaster: None
 
     def __init__(
         self,
@@ -63,6 +66,10 @@ class GameMaster(Script):
         self._active_spawn_slots: set[str] = set()
         self.currentScore = 0
 
+    def Awake(self) -> None:
+        GameMaster.CurrentGameMaster = self
+        return super().Awake()
+    
     @property
     def gameObjects(self) -> list[GameObject]:
         return GameWorld.GetInstance().GameObjects
@@ -268,16 +275,14 @@ class GameMaster(Script):
         turret = GameObject(f"WaveTurret_{self.currentWave}_{len(self.yet_to_spawn_turrets)}", "Enemy")
         turret.Transform.Position = Vector3(self.spawnLocations[spawn_name])
         turret._spawn_slot = spawn_name  # type: ignore
+        turret.AddComponent(BoxCollider(pygame.Vector3(2, 2, 2)))
+        turret.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Turret"))
+        turret.AddComponent(DebugColliderRenderer())
+        turret.AddComponent(Rotator())
         if spawn_name == "outerRim":
-            turret.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Crystal"))
-            turret.AddComponent(DebugColliderRenderer())
-            turret.AddComponent(Rotator())
             turret.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(255, 200, 255)))
-            turret.AddComponent(RimTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty)), orbit_center=Vector3(0,0,0), orbit_radius=35.0, orbit_angular_speed=0.9, orbit_clockwise=random.choice([True, False])))
+            turret.AddComponent(RimTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty)), orbit_center=Vector3(0,0,0), orbit_radius=20.0, orbit_angular_speed=0.50, orbit_clockwise=random.choice([True, False])))
         else:
-            turret.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Crystal"))
-            turret.AddComponent(DebugColliderRenderer())
-            turret.AddComponent(Rotator())
             turret.AddComponent(CrystalTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty))))
             turret.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
         turret.AddComponent(AudioSource(f"spawn_{turret.__hash__()}", "src/sound/spawn_turret.wav"))
