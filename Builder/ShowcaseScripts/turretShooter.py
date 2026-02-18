@@ -1,7 +1,7 @@
 import math
 import pygame
 from GameEssentials import GameObject, GameWorld
-from Components import BoxCollider, ShapeRenderer, Script
+from Components import BoxCollider, ShapeRenderer, Script, AudioSource
 
 
 class Projectile(Script):
@@ -34,7 +34,7 @@ class Projectile(Script):
 class CrystalTurret(Script):
     def __init__(
         self,
-        fire_interval: float = 2.5,
+        fire_interval: float = 5.0,
         projectile_speed: float = 12.0,
         projectile_lifetime: float = 5.0,
         projectile_scale: tuple[float, float, float] = (0.2, 0.2, 0.2),
@@ -48,12 +48,38 @@ class CrystalTurret(Script):
         self.projectile_color = projectile_color
         self._cooldown = 0.0
         self._elapsed = 0.0
+        self._shoot_sound: AudioSource = None
 
     def Start(self):
         self._cooldown = self._current_interval()
 
+
     def Update(self, deltaTime: float):
-        self._elapsed += deltaTime
+        if not self._shoot_sound:
+            for comp in self.GameObject.GetAllComponentsOfType(AudioSource):
+                if comp.soundName == "shoot":
+                    self._shoot_sound = comp
+                    break
+        # self._elapsed += deltaTime
+        # target = self._get_target()
+        # if not target:
+        #     return
+
+        # turret_pos = self.GameObject.Transform.WorldPosition
+        # target_pos = target.Transform.WorldPosition
+        # direction = target_pos - turret_pos
+        # if direction.length() == 0:
+        #     return
+        # direction.normalize_ip()
+
+        # self._aim_at(direction)
+
+        # self._cooldown -= deltaTime
+        # if self._cooldown <= 0:
+        #     self._cooldown = self._current_interval()
+        #     self._spawn_projectile(direction)
+
+    def Shoot(self):
         target = self._get_target()
         if not target:
             return
@@ -66,12 +92,8 @@ class CrystalTurret(Script):
         direction.normalize_ip()
 
         self._aim_at(direction)
-
-        self._cooldown -= deltaTime
-        if self._cooldown <= 0:
-            self._cooldown = self._current_interval()
-            self._spawn_projectile(direction)
-
+        self._spawn_projectile(direction)
+    
     def _current_interval(self) -> float:
         # 1% faster per second: interval scales by 1 / (1.01 ** t)
         return self.base_fire_interval / (1.01 ** self._elapsed)
@@ -109,3 +131,5 @@ class CrystalTurret(Script):
         GameWorld.GetInstance().Instantiate(projectile)
         projectile.Awake()
         projectile.Start()
+        if self._shoot_sound:
+            self._shoot_sound.Play()
