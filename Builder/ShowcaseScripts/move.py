@@ -14,23 +14,23 @@ class Move(Script):
         self.speed = 20
         self.inputLayer = inputLayer
         
-        inputLayer.AddKeyEvent(pygame.K_w, ButtonState.PRESSED, lambda : self.addZ(-self.speed))
-        inputLayer.AddKeyEvent(pygame.K_w, ButtonState.RELEASED, lambda : self.addZ(self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_w, ButtonState.PRESSED, lambda : self.addZ(-self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_w, ButtonState.RELEASED, lambda : self.addZ(self.speed))
         
-        inputLayer.AddKeyEvent(pygame.K_a, ButtonState.PRESSED, lambda : self.addX(-self.speed))
-        inputLayer.AddKeyEvent(pygame.K_a, ButtonState.RELEASED, lambda : self.addX(self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_a, ButtonState.PRESSED, lambda : self.addX(-self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_a, ButtonState.RELEASED, lambda : self.addX(self.speed))
         
-        inputLayer.AddKeyEvent(pygame.K_s, ButtonState.PRESSED, lambda : self.addZ(self.speed))
-        inputLayer.AddKeyEvent(pygame.K_s, ButtonState.RELEASED, lambda : self.addZ(-self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_s, ButtonState.PRESSED, lambda : self.addZ(self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_s, ButtonState.RELEASED, lambda : self.addZ(-self.speed))
         
-        inputLayer.AddKeyEvent(pygame.K_d, ButtonState.PRESSED, lambda : self.addX(self.speed))
-        inputLayer.AddKeyEvent(pygame.K_d, ButtonState.RELEASED, lambda : self.addX(-self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_d, ButtonState.PRESSED, lambda : self.addX(self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_d, ButtonState.RELEASED, lambda : self.addX(-self.speed))
         
-        inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.addY(self.speed))
-        inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.RELEASED, lambda : self.addY(-self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.addY(self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.RELEASED, lambda : self.addY(-self.speed))
         
-        inputLayer.AddKeyEvent(pygame.K_c, ButtonState.PRESSED, lambda : self.addY(-self.speed))
-        inputLayer.AddKeyEvent(pygame.K_c, ButtonState.RELEASED, lambda : self.addY(self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_c, ButtonState.PRESSED, lambda : self.addY(-self.speed))
+        # inputLayer.AddKeyEvent(pygame.K_c, ButtonState.RELEASED, lambda : self.addY(self.speed))
         
         inputLayer.AddMouseMoveEvent(lambda position: self.HandleMouseMove(position))
         

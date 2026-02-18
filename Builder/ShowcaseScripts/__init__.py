@@ -6,6 +6,7 @@ from .turretShooter import CrystalTurret, RimTurret, BaseTurret
 from .GameInput import GameInputLayer
 from .positionToLabel import PositionToLabel
 from .gameMaster import GameMaster
+from .player import Player
 
 __all__=[
     "Rotator",
@@ -17,5 +18,6 @@ __all__=[
     "PositionToLabel",
     "GameMaster",
     "RimTurret",
-    "BaseTurret"
+    "BaseTurret",
+    "Player"
 ]

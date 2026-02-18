@@ -29,9 +29,8 @@ class Projectile(Script):
     def OnCollisionEnter(self, other: BoxCollider):
         if other.GameObject == self.owner:
             return
-        if other.GameObject.Tag == "Projectile":
-            return
-        self.GameObject.Destroy()
+        else:
+            self.GameObject.Destroy()
         
     def OnDestroy(self):
         if self.audioSource:
@@ -97,6 +96,10 @@ class BaseTurret(Script):
         projectile.Start()
         if self._shoot_sound:
             self._shoot_sound.Play()
+    
+    def OnCollisionEnter(self, other):
+        if other.tag == "Projectile" and other.GetComponent(Projectile).owner.tag == "Player":
+            self.GameObject.Destroy()
 
 class CrystalTurret(BaseTurret):
     def __init__(

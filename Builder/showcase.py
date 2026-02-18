@@ -16,7 +16,7 @@ import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster
+from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(0,0,0)
@@ -43,6 +43,8 @@ class Showcase(GameBuilder):
         cameraObject.AddComponent(DebugColliderRenderer())
         cameraObject.AddComponent(Move(InputHandler))
         cameraObject.AddComponent(AudioListener())
+        cameraObject.AddComponent(Player(InputHandler))
+        cameraObject.AddComponent(AudioSource(soundName=f"player_shoot", soundPath="src/sound/shoot_sound2.wav", autoPlay=False))
         gameObjects.append(cameraObject)
 
         # ---------- LIGHT ----------
