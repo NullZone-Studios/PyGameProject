@@ -1,5 +1,4 @@
 from Builder.ShowcaseScripts.GameInput import GameInputLayer, MouseKeys
-from Builder.ShowcaseScripts.gameMaster import GameMaster
 from Components.script import Script
 import pygame
 
@@ -11,23 +10,21 @@ import random
 
 
 class Player(Script):
+    PlayerObject: GameObject = None
+    
     def __init__(self, inputLayer: GameInputLayer):
+        if Player.PlayerObject is not None:
+            raise Exception("Player already exists! Multiple instances of Player are not allowed.")
         super().__init__()
         self.screen: pygame.Surface = pygame.display.get_surface()
         self.base_shoot_cooldown = 1.0
         self.shoot_cooldown = 0.0
         self.inputLayer = inputLayer
         self.life = 3
+        self.shootingActivated = False
         self.invulnerability_time = 0.0  # Time remaining for invulnerability after being hit
         self._AudioSource: AudioSource = None
-        
-        inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.Shoot())
-        inputLayer.AddMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, lambda position: self.Shoot())
     
-    def Start(self):
-        self._AudioSource = self.GameObject.GetFirstComponentOfType(AudioSource)
-        return super().Start()
-        
     def Shoot(self):
         if self.shoot_cooldown <= 0:
             direction = -self.GameObject.Transform.Forward
@@ -36,6 +33,21 @@ class Player(Script):
             if self._AudioSource and self._AudioSource.soundName == "player_shoot":
                 self._AudioSource.Play()
     
+    def ActivateShooting(self):
+        self.shootingActivated = not self.shootingActivated
+        if self.shootingActivated:
+            self.inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.Shoot())
+            self.inputLayer.AddMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, lambda position: self.Shoot())
+            
+        else:
+            self.inputLayer.RemoveKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.Shoot())
+            self.inputLayer.RemoveMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, lambda position: self.Shoot())
+    
+    def Start(self):
+        self._AudioSource = self.GameObject.GetFirstComponentOfType(AudioSource)
+        self.PlayerObject = self.GameObject
+        return super().Start()
+        
     
     def _spawn_projectile(self, direction: pygame.Vector3):
         projectile = GameObject("CrystalShot", "Projectile")
@@ -75,6 +87,7 @@ class Player(Script):
             print(f"Player hit! Remaining life: {self.life}")
             if self.life <= 0:
                 print("Player has been destroyed!")
+                from .gameMaster import GameMaster
                 GameMaster.CurrentGameMaster.EndGame()  # Assuming there's an EndGame method to handle game over logic
                 # Here you could add logic to handle player death, such as respawning or ending the game.
         return super().OnCollisionEnter(other)

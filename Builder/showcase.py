@@ -1,3 +1,4 @@
+from Builder.ShowcaseScripts.cameraController import CameraController
 from GameEssentials import GameObject, Input, SoundEngine, GameWorld
 from Components import (
     Transform,
@@ -41,15 +42,21 @@ class Showcase(GameBuilder):
         # --- Basic Controlls ---
         InputHandler.AddKeyEvent(pygame.K_ESCAPE, Input.ButtonState.PRESSED, self.ToggleMouse)
         
+        # ---------- PLAYER ----------
+        playerObject = GameObject("Player", "Player")
+        playerObject.AddComponent(CollisionLogger(pygame.Vector3(1.5, 1.5, 1.5), "Player"))
+        playerObject.AddComponent(DebugColliderRenderer())
+        playerObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color("cornflowerblue"), scale=(1,1,1)))
+        playerObject.AddComponent(Move(InputHandler))
+        playerObject.AddComponent(AudioSource(soundName=f"player_shoot", soundPath="src/sound/shoot_sound2.wav", autoPlay=False))
+        playerObject.AddComponent(Player(InputHandler))
+        gameObjects.append(playerObject)
+        
         # ---------- CAMERA ----------
         cameraObject = GameObject("MainCamera", "Camera")
         cameraObject.AddComponent(Camera(Showcase.RESOLUTION.x, Showcase.RESOLUTION.y))
-        cameraObject.AddComponent(CollisionLogger(pygame.Vector3(1.5, 1.5, 1.5), "Camera"))
-        cameraObject.AddComponent(DebugColliderRenderer())
-        cameraObject.AddComponent(Move(InputHandler))
         cameraObject.AddComponent(AudioListener())
-        cameraObject.AddComponent(Player(InputHandler))
-        cameraObject.AddComponent(AudioSource(soundName=f"player_shoot", soundPath="src/sound/shoot_sound2.wav", autoPlay=False))
+        cameraObject.AddComponent(CameraController())
         gameObjects.append(cameraObject)
 
         # ---------- LIGHT ----------
@@ -128,8 +135,8 @@ class Showcase(GameBuilder):
         gm = GameMaster()
         gogm.AddComponent(gm)
         gameObjects.append(gogm)
-        gm.EasyMode()
-        gm.StartGame()
+        #gm.EasyMode()
+        #gm.StartGame()
         
         # ---------- UI ----------
         crossHairUI = GameObject("crosshair", "Overlay")
