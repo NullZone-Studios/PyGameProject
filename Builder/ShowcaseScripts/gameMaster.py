@@ -3,15 +3,16 @@ from collections import deque
 import pygame
 from pygame import Vector3
 
-from Builder.ShowcaseScripts import CollisionLogger, Rotator
 from Components.collider import BoxCollider
 from GameEssentials import GameObject, GameWorld
 from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSource
-from .turretShooter import CrystalTurret, RimTurret, BaseTurret
+from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret
+from .collisionLogger import CollisionLogger
+from .rotator import Rotator
 
 class GameMaster(Script):
 
-    CurrentGameMaster: None
+    CurrentGameMaster = None
 
     def __init__(
         self,
@@ -22,6 +23,8 @@ class GameMaster(Script):
         final_wave: int = 10,
         max_difficulty: float | None = None,
     ) -> None:
+        if GameMaster.CurrentGameMaster is not None:
+            raise Exception("GameMaster instance already exists! Multiple instances of GameMaster are not allowed.")
         super().__init__()
         self.currentWave = 0
         self.starting_difficulty = max(0.0, starting_difficulty)
@@ -118,6 +121,8 @@ class GameMaster(Script):
         self.yet_to_spawn_turrets.clear()
         self.spawnedWaveTurrets.clear()
         self._active_spawn_slots.clear()
+        from .player import Player
+        Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
         self.StartWave()
 
     def Pause(self) -> None:
@@ -132,6 +137,8 @@ class GameMaster(Script):
         self.is_running = False
         self.is_game_over = True
         self.is_paused = False
+        from .player import Player
+        Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
 
     def StartWave(self) -> None:
         if self.HasReachedFinalWave():
@@ -281,7 +288,7 @@ class GameMaster(Script):
         turret.AddComponent(Rotator())
         if spawn_name == "outerRim":
             turret.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color(255, 200, 255)))
-            turret.AddComponent(RimTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty)), orbit_center=Vector3(0,0,0), orbit_radius=20.0, orbit_angular_speed=0.50, orbit_clockwise=random.choice([True, False])))
+            turret.AddComponent(OrbitTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty)), orbit_center=Vector3(0,0,0), orbit_radius=20.0, orbit_angular_speed=0.50, orbit_clockwise=random.choice([True, False])))
         else:
             turret.AddComponent(CrystalTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty))))
             turret.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
@@ -351,7 +358,7 @@ class GameMaster(Script):
                 continue
             shooter = turret_obj.GetFirstComponentOfType(CrystalTurret)
             if shooter is None:
-                shooter = turret_obj.GetFirstComponentOfType(RimTurret)
+                shooter = turret_obj.GetFirstComponentOfType(OrbitTurret)
             if shooter is not None:
                 shooters.append(shooter)
         if not shooters:

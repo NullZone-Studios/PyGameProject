@@ -98,7 +98,7 @@ class BaseTurret(Script):
             self._shoot_sound.Play()
     
     def OnCollisionEnter(self, other):
-        if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag == "Camera":
+        if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag == "Player":
             self.GameObject.Destroy()
 
 class CrystalTurret(BaseTurret):
@@ -151,7 +151,7 @@ class CrystalTurret(BaseTurret):
 
 
 
-class RimTurret(BaseTurret):
+class OrbitTurret(BaseTurret):
     def __init__(
         self,
         fire_interval: float = 5.0,
