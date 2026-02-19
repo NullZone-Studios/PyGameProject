@@ -46,7 +46,7 @@ class Move(Script):
         )
     
     def Start(self):
-        pygame.mouse.set_relative_mode(True)
+        pygame.mouse.set_relative_mode(False)
         
     def HandleMouseMove(self, position: pygame.Vector2):
         if pygame.mouse.get_relative_mode():
