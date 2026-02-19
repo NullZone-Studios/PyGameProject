@@ -45,7 +45,7 @@ class Player(Script):
     
     def Start(self):
         self._AudioSource = self.GameObject.GetFirstComponentOfType(AudioSource)
-        self.PlayerObject = self.GameObject
+        Player.PlayerObject = self.GameObject
         return super().Start()
         
     
