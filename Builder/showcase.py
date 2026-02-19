@@ -18,7 +18,7 @@ import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player, volumeLabels, GameScoreUpdater
+from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player, volumeLabels, GameScoreUpdater, HighScoreHandler
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(0,0,0)
@@ -383,6 +383,31 @@ class Showcase(GameBuilder):
         optionsButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
         optionsBackButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
         
+        highScoreUI = GameObject("Highscore", "Overlay")
+        highScoreCanvas: UI.Canvas = highScoreUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y))
+        highscoreContainer = highScoreCanvas.root.AddChild(UI.Element())
+        highscoreContainer.style = UI.Style(
+            font = inGameCanvas.root.style.font,
+            color = inGameCanvas.root.style.color,
+            display="flex",
+            flexDirection="collumn",
+            gap=10,
+            margin=(20,20)
+        )
+        oatScore = highscoreContainer.AddChild(UI.Label("OAT", "HIGHSCORE: 0"))
+        lastScore = highscoreContainer.AddChild(UI.Label("last", "LAST SCORE: 0"))
+        
+        oatScore.style = UI.Style(
+            color= pygame.Color("goldenrod")
+        )
+        lastScore.style = UI.Style(
+            color= pygame.Color("cornflowerblue")
+        )
+        highScoreUI.AddComponent(HighScoreHandler(oatScore, lastScore))
+        
+        gameObjects.append(highScoreUI)
+        
+        
         # ------ STAR FIELD ----------
         starBoxObject = GameObject("StarBox", "World")
         starBoxObject.Transform.SetScale(pygame.Vector3(10,10,10))
@@ -407,7 +432,6 @@ class Showcase(GameBuilder):
             else:
                 child.Transform.Translate(z=np.random.randint(-200,-80))
                 
-            
             child.Transform.LookAt(pygame.Vector3(0,0,0))
             child.Transform.Rotate(pitch=np.pi/2)
         gameObjects.append(starBoxObject)

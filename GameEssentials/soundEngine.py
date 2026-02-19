@@ -120,17 +120,17 @@ class SoundEngine:
         self.listener.set_gain(self.masterVolume)
         
     def SetMasterVolume(self, volume: float):
-        self.masterVolume = max(0, min(1, volume))
+        self.masterVolume = max(0.0, min(1.0, volume))
         self.UpdateListener()
         self.UpdateMusic()
         self.UpdateSound()
         
     def SetMusicVolume(self, volume: float):
-        self.musicVolume = max(0, min(1, volume))
+        self.musicVolume = max(0.0, min(1.0, volume))
         self.UpdateMusic()
     
     def SetSFXVolume(self, volume: float):
-        self.sfxVolume = max(0, min(1, volume))
+        self.sfxVolume = max(0.0, min(1.0, volume))
         self.UpdateSound()
         
     def UpdateMusic(self):

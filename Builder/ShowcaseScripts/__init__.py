@@ -9,6 +9,7 @@ from .gameMaster import GameMaster
 from .player import Player
 from .cameraController import CameraController
 from .gameScoreUpdater import GameScoreUpdater
+from .highScoreHandler import HighScoreHandler
 
 __all__=[
     "Rotator",
@@ -24,5 +25,6 @@ __all__=[
     "Player",
     "CameraController",
     "GameScoreUpdater"
-    "MFOrbitTurret"
+    "MFOrbitTurret",
+    "HighScoreHandler"
 ]

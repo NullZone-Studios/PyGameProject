@@ -9,6 +9,7 @@ from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSourc
 from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret, MFOrbitTurret
 from .collisionLogger import CollisionLogger
 from .rotator import Rotator
+from .highScoreHandler import HighScoreHandler
 
 class GameMaster(Script):
 
@@ -118,6 +119,7 @@ class GameMaster(Script):
         GameWorld.GetInstance().FindByName("crosshair").Enable()
         GameWorld.GetInstance().FindByName("inGameUI").Enable()
         GameWorld.GetInstance().FindByName("StartMenuUI").Disable()
+        GameWorld.GetInstance().FindByName("Highscore").Disable()
 
         self.is_running = True
         self.is_paused = False
@@ -156,9 +158,13 @@ class GameMaster(Script):
         GameWorld.GetInstance().FindByName("crosshair").Disable()
         GameWorld.GetInstance().FindByName("inGameUI").Disable()
         GameWorld.GetInstance().FindByName("StartMenuUI").Enable()
+        highScore = GameWorld.GetInstance().FindByName("Highscore")
+        highScore.Enable()
+        highScore.GetComponent(HighScoreHandler).NewScore(self.currentScore)
 
         from .player import Player
         Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
+        
 
     def StartWave(self) -> None:
         if self.HasReachedFinalWave():
