@@ -141,6 +141,6 @@ class SoundEngine:
     def UpdateSound(self):
         for sound in self.sounds:
             pool = self.sounds[sound]
-            for source in pool:
-                source.set_gain(self.sfxVolume * self.masterVolume)
+            for entry in pool:
+                entry["source"].set_gain(self.sfxVolume * self.masterVolume)
     
