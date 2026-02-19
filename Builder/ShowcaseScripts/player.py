@@ -22,13 +22,20 @@ class Player(Script):
         self.inputLayer = inputLayer
         self.life = 3
         self.shootingActivated = False
-        self.invulnerability_time = 0.0  # Time remaining for invulnerability after being hit
+        self.invulnerability_time = 1.0  # Time remaining for invulnerability after being hit
         self._AudioSource: AudioSource = None
-    
+        
     def Shoot(self):
         if self.shoot_cooldown <= 0:
-            direction = -self.GameObject.Transform.Forward
-            self._spawn_projectile(direction)
+            camera_obj = None
+            if GameWorld.GetInstance().MainCamera:
+                camera_obj = GameWorld.GetInstance().MainCamera.GameObject
+            if camera_obj is None:
+                camera_obj = GameWorld.GetInstance().FindByTag("Camera")
+
+            source_obj = camera_obj if camera_obj is not None else self.GameObject
+            direction = -source_obj.Transform.Forward
+            self._spawn_projectile(direction, spawn_origin=source_obj.Transform.WorldPosition)
             self.shoot_cooldown = self.base_shoot_cooldown
             if self._AudioSource and self._AudioSource.soundName == "player_shoot":
                 self._AudioSource.Play()
@@ -49,9 +56,10 @@ class Player(Script):
         return super().Start()
         
     
-    def _spawn_projectile(self, direction: pygame.Vector3):
+    def _spawn_projectile(self, direction: pygame.Vector3, spawn_origin: pygame.Vector3 | None = None):
         projectile = GameObject("CrystalShot", "Projectile")
-        projectile.Transform.Position = self.GameObject.Transform.WorldPosition + direction * 1.2
+        origin = spawn_origin if spawn_origin is not None else self.GameObject.Transform.WorldPosition
+        projectile.Transform.Position = origin + direction * 1.2
         projectile.AddComponent(
             ShapeRenderer(
                 shape="cone",
@@ -88,6 +96,5 @@ class Player(Script):
             if self.life <= 0:
                 print("Player has been destroyed!")
                 from .gameMaster import GameMaster
-                GameMaster.CurrentGameMaster.EndGame()  # Assuming there's an EndGame method to handle game over logic
-                # Here you could add logic to handle player death, such as respawning or ending the game.
+                GameMaster.CurrentGameMaster.EndGame()
         return super().OnCollisionEnter(other)

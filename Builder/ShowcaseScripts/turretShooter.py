@@ -62,9 +62,10 @@ class BaseTurret(Script):
         return self.base_fire_interval / (1.01 ** self._elapsed)
 
     def _get_target(self) -> GameObject | None:
-        if GameWorld.GetInstance().MainCamera:
-            return GameWorld.GetInstance().MainCamera.GameObject
-        return GameWorld.GetInstance().FindByTag("Camera")
+        from .player import Player
+        if Player.PlayerObject:
+            return Player.PlayerObject
+        return GameWorld.GetInstance().FindByTag("Player")
 
     def _aim_at(self, direction: pygame.Vector3):
         yaw = math.atan2(direction.x, direction.z)
