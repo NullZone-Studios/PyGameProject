@@ -18,7 +18,7 @@ import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player
+from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player, volumeLabels
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(0,0,0)
@@ -263,6 +263,75 @@ class Showcase(GameBuilder):
             )
         )
         optionsBackButton.cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_HAND)
+        
+        # ----- Volume Options ------
+        masterVolumeContainer = optionsCanvas.root.AddChild(UI.Element("masterVolume"))
+        masterVolumeContainer.style = UI.Style(
+            margin=(50,50,0,0),
+            display="flex",
+            flexDirection="row",
+            gap=2,
+            color= pygame.Color("white"),
+            font= pygame.font.SysFont("arial", 36, bold=True)
+        )
+        masterLabel = masterVolumeContainer.AddChild(UI.Label("masterLabel", "Master Volume"))
+        masterButton1 = masterVolumeContainer.AddChild(UI.Button("0%"))
+        masterButton2 = masterVolumeContainer.AddChild(UI.Button("25%"))
+        masterButton3 = masterVolumeContainer.AddChild(UI.Button("50%"))
+        masterButton4 = masterVolumeContainer.AddChild(UI.Button("75%"))
+        masterButton5 = masterVolumeContainer.AddChild(UI.Button("100%"))
+        actualMaster = masterVolumeContainer.AddChild(UI.Label("actualVolume", "= 100%"))
+        actualMaster.style = UI.Style(
+            margin=(0,20)
+        )
+        
+        musicVolumeContainer = optionsCanvas.root.AddChild(UI.Element("musicVolume"))
+        musicVolumeContainer.style = masterVolumeContainer.style
+        musicLabel = musicVolumeContainer.AddChild(UI.Label("musicLabel", "Music Volume"))
+        musicButton1 = musicVolumeContainer.AddChild(UI.Button("0%"))
+        musicButton2 = musicVolumeContainer.AddChild(UI.Button("25%"))
+        musicButton3 = musicVolumeContainer.AddChild(UI.Button("50%"))
+        musicButton4 = musicVolumeContainer.AddChild(UI.Button("75%"))
+        musicButton5 = musicVolumeContainer.AddChild(UI.Button("100%"))
+        actualMusic = musicVolumeContainer.AddChild(UI.Label("actualVolume", "= 100%"))
+        actualMusic.style = actualMaster.style
+        
+        sfxVolumeContainer = optionsCanvas.root.AddChild(UI.Element("sfxVolume"))
+        sfxVolumeContainer.style = masterVolumeContainer.style
+        sfxLabel = sfxVolumeContainer.AddChild(UI.Label("sfxLabel", "SFX Volume"))
+        sfxButton1 = sfxVolumeContainer.AddChild(UI.Button("0%"))
+        sfxButton2 = sfxVolumeContainer.AddChild(UI.Button("25%"))
+        sfxButton3 = sfxVolumeContainer.AddChild(UI.Button("50%"))
+        sfxButton4 = sfxVolumeContainer.AddChild(UI.Button("75%"))
+        sfxButton5 = sfxVolumeContainer.AddChild(UI.Button("100%"))
+        actualSFX = sfxVolumeContainer.AddChild(UI.Label("actualVolume", "= 100%"))
+        actualSFX.style = actualMaster.style
+        
+        # ---- Option button bindings for IU ----
+        masterButton1.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMasterVolume(0))
+        masterButton2.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMasterVolume(.25))
+        masterButton3.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMasterVolume(.5))
+        masterButton4.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMasterVolume(.75))
+        masterButton5.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMasterVolume(1))
+        
+        musicButton1.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMusicVolume(0))
+        musicButton2.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMusicVolume(.25))
+        musicButton3.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMusicVolume(.5))
+        musicButton4.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMusicVolume(.75))
+        musicButton5.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetMusicVolume(1))
+        
+        sfxButton1.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetSFXVolume(0))
+        sfxButton2.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetSFXVolume(.25))
+        sfxButton3.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetSFXVolume(.5))
+        sfxButton4.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetSFXVolume(.75))
+        sfxButton5.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: SoundEngine.GetInstance().SetSFXVolume(1))
+        
+        # ---- Bind volume labels to SoundEngine ----
+        optionsMenuUI.AddComponent(volumeLabels.MasterVolumeLabel(actualMaster))
+        optionsMenuUI.AddComponent(volumeLabels.MusicVolumeLabel(actualMusic))
+        optionsMenuUI.AddComponent(volumeLabels.SFXVolumeLabel(actualSFX))
+        
+        
         optionsMenuUI.Disable()
         gameObjects.append(optionsMenuUI)
         
