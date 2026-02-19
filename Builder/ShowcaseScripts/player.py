@@ -72,7 +72,7 @@ class Player(Script):
         projectile.AddComponent(
             Projectile(
                 direction=direction,
-                speed=20.0,
+                speed=35.0,
                 lifetime=5.0,
                 owner=self.GameObject,
             )

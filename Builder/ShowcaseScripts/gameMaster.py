@@ -157,6 +157,8 @@ class GameMaster(Script):
         GameWorld.GetInstance().FindByName("inGameUI").Disable()
         GameWorld.GetInstance().FindByName("StartMenuUI").Enable()
 
+        from .player import Player
+        Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
 
     def StartWave(self) -> None:
         if self.HasReachedFinalWave():
