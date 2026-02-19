@@ -141,6 +141,7 @@ class Showcase(GameBuilder):
         gogm = GameObject("GameMaster", "Logic")
         gm = GameMaster()
         gogm.AddComponent(gm)
+        gogm.AddComponent(AudioSource("nextWave", "src/sound/level_sound.wav"))
         gameObjects.append(gogm)
         gm.EasyMode()
         #gm.StartGame()

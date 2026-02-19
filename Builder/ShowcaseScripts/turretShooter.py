@@ -4,7 +4,6 @@ from GameEssentials import GameObject, GameWorld
 from Components import BoxCollider, ShapeRenderer, Script, AudioSource
 import random
 
-
 class Projectile(Script):
     def __init__(self, direction: pygame.Vector3, speed: float = 12.0, lifetime: float = 5.0, owner: GameObject | None = None):
         super().__init__()
