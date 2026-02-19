@@ -372,17 +372,6 @@ class Showcase(GameBuilder):
         gameObjects.append(inGameUI)
         
         
-        def ToggleOptionsMenu():
-            if optionsMenuUI.Enabled:
-                startMenuUI.Enable()
-                optionsMenuUI.Disable()
-            else:
-                startMenuUI.Disable()
-                optionsMenuUI.Enable()
-        
-        optionsButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
-        optionsBackButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
-        
         highScoreUI = GameObject("Highscore", "Overlay")
         highScoreCanvas: UI.Canvas = highScoreUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y))
         highscoreContainer = highScoreCanvas.root.AddChild(UI.Element())
@@ -406,6 +395,20 @@ class Showcase(GameBuilder):
         highScoreUI.AddComponent(HighScoreHandler(oatScore, lastScore))
         
         gameObjects.append(highScoreUI)
+        
+        
+        def ToggleOptionsMenu():
+            if optionsMenuUI.Enabled:
+                startMenuUI.Enable()
+                highScoreUI.Enable()
+                optionsMenuUI.Disable()
+            else:
+                startMenuUI.Disable()
+                highScoreUI.Disable()
+                optionsMenuUI.Enable()
+        
+        optionsButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
+        optionsBackButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
         
         
         # ------ STAR FIELD ----------
