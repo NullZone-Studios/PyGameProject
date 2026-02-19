@@ -41,6 +41,14 @@ class BaseTurret(Script):
         super().__init__()
         self._shoot_sound: AudioSource = None
     
+    def Start(self):
+        for audio in self.GameObject.GetAllComponentsOfType(AudioSource):
+            if audio.soundName == "shoot":
+                self._shoot_sound = audio
+                break
+        
+        return super().Start()
+    
     def Shoot(self):
         target = self._get_target()
         if not target:
@@ -200,6 +208,8 @@ class MFOrbitTurret(BaseTurret):
         self.BasicAIChanger()
         self._next_shot_delay = self._RollNextShotDelay(difficulty)
         self._shot_timer = self._next_shot_delay
+        
+        return super().Start()
 
     def _GetDifficulty(self) -> float:
         from .gameMaster import GameMaster
@@ -312,6 +322,8 @@ class OrbitTurret(BaseTurret):
             self._orbit_angle = math.atan2(offset.z, offset.x)
         else:
             self._orbit_angle = 0.0
+            
+        return super().Start()
         
     def Update(self, deltaTime: float):
         if not self._shoot_sound:
