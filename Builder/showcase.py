@@ -188,7 +188,7 @@ class Showcase(GameBuilder):
             background=pygame.Color("white"),
             borderRadius=20
         )
-        
+        crossHairUI.Disable()
         gameObjects.append(crossHairUI)
         
         # ---------- START MENU UI ----------
