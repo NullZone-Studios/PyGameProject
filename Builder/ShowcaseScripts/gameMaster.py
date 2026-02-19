@@ -70,6 +70,9 @@ class GameMaster(Script):
         self._active_spawn_slots: set[str] = set()
         self.currentScore = 0
         self.nextLevel : AudioSource = None
+        self.player_shoot_cooldown_reset = 1.0
+        self.player_shoot_cooldown_min = 0.2
+        self.player_shoot_cooldown_boss_multiplier = 0.95
 
     def Awake(self) -> None:
         GameMaster.CurrentGameMaster = self
@@ -136,6 +139,8 @@ class GameMaster(Script):
         self._active_spawn_slots.clear()
         from .player import Player
         player = Player.PlayerObject.GetFirstComponentOfType(Player)
+        player.base_shoot_cooldown = self.player_shoot_cooldown_reset
+        player.shoot_cooldown = 0.0
         player.ActivateShooting()
         player.life = 3
         self.StartWave()
@@ -186,6 +191,7 @@ class GameMaster(Script):
             self.EndBossBattle()
             self.currentScore += int(500 * self.difficulty)  # Bonus for defeating boss wave
             self.boss_waves_completed += 1
+            self._ApplyBossFireRateReward()
         else:
             self.currentScore += int(250 * self.difficulty)  # Bonus for completing normal wave
             self.normal_waves_completed += 1
@@ -384,6 +390,20 @@ class GameMaster(Script):
         self.wave_difficulty_increase = max(0.0, wave_difficulty_increase)
         self.boss_difficulty_increase = max(0.0, boss_difficulty_increase)
         self._RecalculateDifficulty()
+
+    def _ApplyBossFireRateReward(self) -> None:
+        from .player import Player
+
+        if Player.PlayerObject is None:
+            return
+        player = Player.PlayerObject.GetFirstComponentOfType(Player)
+        if player is None:
+            return
+
+        player.base_shoot_cooldown = max(
+            self.player_shoot_cooldown_min,
+            player.base_shoot_cooldown * self.player_shoot_cooldown_boss_multiplier,
+        )
     
     def _recalculateShootingCooldown(self) -> float:
         return max(0.5, self.starting_turrets_shooting_delay / max(1.0, self.difficulty))
