@@ -1,9 +1,9 @@
 import pygame
-from GameEssentials import Input, Renderer, GameWorld
+from GameEssentials import Input, Renderer, GameWorld, SoundEngine
 from GameEssentials.collisionSystem import CollisionSystem
 
 # pygame setup
-class Engine:
+class Engine:    
     def __init__(self, game):
         pygame.init()
         self.game = game
@@ -12,25 +12,29 @@ class Engine:
         self.screen = pygame.display.set_mode(game.RESOLUTION)
         pygame.display.set_icon(game.ICON)
         pygame.display.set_caption(game.TITLE)
-        self.running = False
         self.renderQueue = []
         self.world = GameWorld.GetInstance()
         self.renderer = Renderer()
+        
+    def Stop(self):
+        if not self.running:
+            return
+        self.running = False
     
     def Run(self):
-        if self.running:
+        if self.game.RUNNING:
             return
-        self.running = True
+        self.game.RUNNING = True
 
         self.world.Awaken()
         self.world.Start()
 
-        while self.running:
+        while self.game.RUNNING:
             # poll for events
             # pygame.QUIT event means the user clicked X to close your window
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
-                    self.running = False
+                    self.game.RUNNING = False
 
             self.input.Update()
 

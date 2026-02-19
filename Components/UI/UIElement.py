@@ -85,153 +85,174 @@ class Element:
         for child in self.children:
             child.ResolveStyle(self.computedStyle)
 
-    def Layout(self, available: pygame.Rect):
+    def Layout(self, available: pygame.Rect, measureOnly: bool = False):
         style = self.computedStyle
         padding = style.padding or BoxSpacing()
         margin = style.margin or BoxSpacing()
-
-        # -----------------------------
-        # 1. Resolve own rectangle
-        # -----------------------------
+        position = style.position or "relative"
+        display = style.display or "block"
+        flexDirection = style.flexDirection or "row"
+        gap = style.gap or 0
+        left = style.left
+        right = style.right
+        top = style.top
+        bottom = style.bottom
         width = style.width
         height = style.height
-
-        x = available.x + margin.left
-        y = available.y + margin.top
-
-        if style.position == "absolute":
-            width = width or available.width
-            height = height or available.height
-
-            x = style.left if style.left is not None else x
-            y = style.top if style.top is not None else y
-
-            if style.right is not None:
-                x = available.width - width - style.right
-            if style.bottom is not None:
-                y = available.height - height - style.bottom
-
-            self.rectangle = pygame.Rect(x, y, width, height)
-
-            for child in self.children:
-                child.Layout(pygame.Rect(0, 0, width, height))
-            return
-
-        # Temporary size if auto
-        tempWidth = width if width is not None else available.width - margin.left - margin.right
-        tempHeight = height if height is not None else available.height - margin.top - margin.bottom
-
-        self.rectangle = pygame.Rect(x, y, tempWidth, tempHeight)
-
-        # -----------------------------
-        # 2. Measure children
-        # -----------------------------
-        flowChildren = [c for c in self.children if c.computedStyle.position != "absolute"]
-
-        if style.display == "flex":
-            intrinsicW, intrinsicH = self._measureFlex(flowChildren, padding)
-        else:
-            intrinsicW, intrinsicH = self._measureBlock(flowChildren, padding)
-
-        if style.width is None:
-            self.rectangle.width = intrinsicW + padding.left + padding.right
-
-        if style.height is None:
-            self.rectangle.height = intrinsicH + padding.top + padding.bottom
-
-        # -----------------------------
-        # 3. Place children
-        # -----------------------------
-        if style.display == "flex":
-            self._layoutFlex(flowChildren, padding)
-        else:
-            self._layoutBlock(flowChildren, padding)
-
-        # Absolute children last
-        for child in self.children:
-            if child.computedStyle.position == "absolute":
-                child.Layout(pygame.Rect(0, 0, self.rectangle.width, self.rectangle.height))
-
-    def _measureBlock(self, children, padding):
-        y = 0
-        maxWidth = 0
-
-        for child in children:
-            child.Layout(pygame.Rect(0, 0, 10_000, 10_000))
-            m = child.computedStyle.margin or BoxSpacing()
-
-            y += child.rectangle.height + m.top + m.bottom
-            maxWidth = max(maxWidth, child.rectangle.width + m.left + m.right)
-
-        return maxWidth, y
-
-
-    def _layoutBlock(self, children, padding):
-        y = padding.top
-
-        for child in children:
-            m = child.computedStyle.margin or BoxSpacing()
-
-            child.Layout(pygame.Rect(
-                padding.left + m.left,
-                y + m.top,
-                self.rectangle.width - padding.left - padding.right - m.left - m.right,
-                self.rectangle.height
-            ))
-
-            y += child.rectangle.height + m.top + m.bottom
-            
-    def _measureFlex(self, children, padding):
-        style = self.computedStyle
-        gap = style.gap or 0
-
-        main = 0
-        cross = 0
-
-        for child in children:
-            child.Layout(pygame.Rect(0, 0, 10_000, 10_000))
-            m = child.computedStyle.margin or BoxSpacing()
-
-            if style.flexDirection == "row":
-                main += child.rectangle.width + m.left + m.right + gap
-                cross = max(cross, child.rectangle.height + m.top + m.bottom)
+        availableWidth = available.width
+        availableHeight = available.height
+        
+        if availableWidth <= 0 or availableHeight <= 0:
+             self.rectangle = pygame.Rect(available.x, available.y, 0, 0)
+             return
+        
+        x = None
+        y = None
+        
+        if width is None and left is not None and right is not None:
+            width = availableWidth - left - right
+        
+        if height is None and top is not None and bottom is not None:
+            height = availableHeight - top - bottom 
+        
+        if width is None or height is None:
+            relevantChildren = [child for child in self.children if child.computedStyle and (child.computedStyle.position or "relative") != "absolute"]
+            if display == "flex":
+                availableMainAxis = availableWidth if flexDirection == "row" else availableHeight
+                availableMainAxis -= padding.left + padding.right if flexDirection == "row" else padding.top + padding.bottom
+                intrinsicWidth, intrinsicHeight = self.measureFlex(relevantChildren, padding, gap, flexDirection, availableMainAxis)
             else:
-                main += child.rectangle.height + m.top + m.bottom + gap
-                cross = max(cross, child.rectangle.width + m.left + m.right)
+                intrinsicWidth, intrinsicHeight = self.measureBlock(relevantChildren, padding, availableWidth - padding.left - padding.right)
+                
+            if width is None:
+                width = intrinsicWidth + padding.left + padding.right
+            if height is None:
+                height = intrinsicHeight + padding.top + padding.bottom
+            
+        if position == "absolute":
+            if left is not None:
+                x = available.x +left
+            elif right is not None:
+                x = available.x + availableWidth - width - right
+            else:
+                x = available.x
+                
+            if top is not None:
+                y = available.y + top
+            elif bottom is not None:
+                y = available.y + availableHeight - height - bottom
+            else:
+                y = available.y
+        else:    
+            x = available.x + margin.left
+            y = available.y + margin.top
+            
+        self.rectangle = pygame.Rect(x, y, width, height)
+        content = self.contentRectangle
+        flowChildren = []
+        absoluteChildren = []
+        
+        for child in self.children:
+            if not child.computedStyle:
+                continue
+            if (child.computedStyle.position or "relative") == "absolute":
+                absoluteChildren.append(child)
+            else:
+                flowChildren.append(child)
 
-        return (main, cross) if style.flexDirection == "row" else (cross, main)
+        if not measureOnly:
+            if display == "flex":
+                self.layoutFlex(flowChildren, content, gap, flexDirection)
+            else:
+                self.layoutBlock(flowChildren, content)
+            
+            for child in absoluteChildren:
+                child.Layout(content)
 
-
-    def _layoutFlex(self, children, padding):
-        style = self.computedStyle
-        gap = style.gap or 0
-
-        cursor = 0
-
+    def measureBlock(self, children: "Element", padding: BoxSpacing, availableWidth: int):
+        maxWidth = 0
+        totalHeight = 0
+                    
         for child in children:
-            m = child.computedStyle.margin or BoxSpacing()
-
-            w = child.computedStyle.width or child.rectangle.width
-            h = child.computedStyle.height or child.rectangle.height
-
-            if style.flexDirection == "row":
-                x = padding.left + cursor + m.left
-                y = padding.top + m.top
-
-                child.Layout(pygame.Rect(x, y, w, h))
-
-                cursor += w + m.left + m.right + gap
-
-            else:  # column
-                x = padding.left + m.left
-                y = padding.top + cursor + m.top
-
-                child.Layout(pygame.Rect(x, y, w, h))
-
-                cursor += h + m.top + m.bottom + gap
-
-
-
+            child.Layout(pygame.Rect(0,0, max(0, availableWidth), 10000), True)
+            margin  = child.computedStyle.margin or BoxSpacing()
+            
+            totalHeight += child.rectangle.height + margin.top + margin.bottom
+            maxWidth = max(maxWidth, child.rectangle.width + margin.left + margin.right)
+        return maxWidth, totalHeight
+    
+    def layoutBlock(self, children: "Element", content: pygame.Rect):
+        cursorY = content.y
+        for child in children:
+            style = child.computedStyle
+            margin = style.margin or BoxSpacing()
+        
+            childAvailable = pygame.Rect(
+                content.x + margin.left,
+                cursorY + margin.top,
+                max(0, content.width - margin.left - margin.right),
+                max(0, content.height)
+            )
+            
+            child.Layout(childAvailable)
+            cursorY += child.rectangle.height + margin.top + margin.bottom
+    
+    def layoutFlex(self, children: "Element", content: pygame.Rect, gap: int, flexDirection: str):
+        cursor = 0
+        
+        for child in children:
+            style = child.computedStyle
+            margin = style.margin or BoxSpacing()
+            
+            if flexDirection == "row":
+                childAvailable = pygame.Rect(
+                    content.x + cursor + margin.left,
+                    content.y + margin.top,
+                    max(0, content.width - cursor - margin.left - margin.right),
+                    max(0, content.height - margin.top - margin.bottom)
+                )
+                child.Layout(childAvailable)
+                cursor += child.rectangle.width + margin.left + margin.right + gap
+            else:
+                childAvailable = pygame.Rect(
+                    content.x + margin.left,
+                    content.y + cursor + margin.top,
+                    max(0, content.width - margin.left - margin.right),
+                    max(0, content.height - cursor - margin.top - margin.bottom)
+                )
+                child.Layout(childAvailable)
+                cursor += child.rectangle.height + margin.top + margin.bottom + gap
+        
+    def measureFlex(self, children: "Element", padding: BoxSpacing, gap: int, flexDirection: str, availableMainAxis: int):
+        main, cross = 0, 0
+        for child in children:
+            margin = child.computedStyle.margin or BoxSpacing()
+            if flexDirection == "row":
+                child.Layout(pygame.Rect(0,0,max(0, availableMainAxis),10000), measureOnly=True)
+                main += child.rectangle.width + margin.left + margin.right + gap
+                cross = max(cross, child.rectangle.height + margin.top + margin.bottom)
+            else:
+                child.Layout(pygame.Rect(0,0,10000,max(0, availableMainAxis)), measureOnly=True)
+                main += child.rectangle.height + margin.top + margin.bottom + gap
+                cross = max(cross, child.rectangle.width + margin.left + margin.right)
+        
+        if children:
+            main -= gap
+        
+        if flexDirection == "row":
+            return main, cross
+        else:
+            return cross, main
+        
+    @property
+    def contentRectangle(self) -> pygame.Rect:
+        padding = self.computedStyle.padding if self.computedStyle and self.computedStyle.padding else BoxSpacing()
+        return pygame.Rect(
+            self.rectangle.x + padding.left,
+            self.rectangle.y + padding.top,
+            self.rectangle.width - padding.left - padding.right,
+            self.rectangle.height - padding.top - padding.bottom
+        )
 
     def Draw(self, surface: Surface, rectangle: pygame.Rect):
         if not self.computedStyle:
@@ -262,117 +283,96 @@ class Element:
                 border_bottom_right_radius=style.borderRadiusBottomRight or 0,
             )
 
-    def Render(self, surface: pygame.Surface, parentClip: Optional[pygame.Rect] = None, offset: Optional[Vector2] = None):
-        if not self.computedStyle:
-            return
-        if not self.visible:
+    def Render(self, surface: pygame.Surface, parentClip: Optional[pygame.Rect] = None, offset: Optional[Vector2] = Vector2(0,0)):
+        if not self.computedStyle or not self.visible:
             return
         
-        offset = offset if offset is not None else Vector2(0,0)
+        rectangle = self.rectangle.move(offset.x, offset.y)
+        clipRectangle = rectangle.clip(parentClip) if parentClip else rectangle
 
         style = self.computedStyle
-        padding = style.padding or BoxSpacing()
+        oveflow = style.overflow or "visible"
+        hasRadius = any([
+            style.borderRadiusTopLeft,
+            style.borderRadiusTopRight,
+            style.borderRadiusBottomLeft,
+            style.borderRadiusBottomRight
+        ])
+        needsMask = oveflow in ("hidden", "scroll", "scroll-x", "scroll-y") and hasRadius
+        needsClipRect = oveflow in ("hidden", "scroll", "scroll-x", "scroll-y")
+        needsLocalSurface = needsMask
         
-        rectangle: pygame.Rect = pygame.Rect(
-            offset.x + self.rectangle.x,
-            offset.y + self.rectangle.y,
-            self.rectangle.width,
-            self.rectangle.height
-        )
-        
-        effectiveClip = parentClip
-        
-        hidden = style.overflow in ("hidden", "scroll", "scroll-x", "scroll-y")
-        rounded = (style.borderRadiusTopLeft or style.borderRadiusTopRight or style.borderRadiusBottomLeft or style.borderRadiusBottomRight)
-        hasRoundedMask = hidden and rounded
-        
-        if hidden:
-            if effectiveClip:
-                effectiveClip = rectangle.clip(effectiveClip)
-            else:
-                effectiveClip = rectangle.copy()
-        
-        oldClip = surface.get_clip()
-        if effectiveClip:
-            surface.set_clip(effectiveClip)
-            
         self.Draw(surface, rectangle)
         
-        childOffset: Vector2 = Vector2(
-            rectangle.x - self.scrollOffset.x,
-            rectangle.y - self.scrollOffset.y
-        )
+        flowChildren = []
+        absoluteChildren = []
+        for child in self.children:
+            if not child.computedStyle:
+                continue
+            if (child.computedStyle.position or "relative") == "absolute":
+                absoluteChildren.append(child)
+            else:
+                flowChildren.append(child)
         
-        if hasRoundedMask:
-            temp = pygame.Surface(rectangle.size, pygame.SRCALPHA)
+        if not needsLocalSurface:
+            for child in flowChildren:
+                child.Render(surface, clipRectangle, offset)
+                
+            for child in absoluteChildren:
+                child.Render(surface, clipRectangle, offset)
+        else:
+            local = pygame.Surface((rectangle.width, rectangle.height), pygame.SRCALPHA)
+            childOffset = Vector2(-rectangle.x, -rectangle.y) + offset
+            for child in flowChildren:
+                child.Render(local, None, childOffset)
             
-            localOffset = Vector2(
-                -self.scrollOffset.x,
-                -self.scrollOffset.y
-            )
-            for child in self.children:
-                    child.Render(temp, None, localOffset)
+            for child in absoluteChildren:
+                child.Render(local, None, childOffset)
 
-            mask = pygame.Surface(rectangle.size, pygame.SRCALPHA)
+            mask = pygame.Surface((rectangle.width, rectangle.height), pygame.SRCALPHA)
             pygame.draw.rect(
                 mask,
-                (255,255,255,255),
+                (255,255,255),
                 mask.get_rect(),
                 border_top_left_radius=style.borderRadiusTopLeft or 0,
                 border_top_right_radius=style.borderRadiusTopRight or 0,
                 border_bottom_left_radius=style.borderRadiusBottomLeft or 0,
-                border_bottom_right_radius=style.borderRadiusBottomRight or 0
+                border_bottom_right_radius=style.borderRadiusBottomRight or 0,
             )
             
-            temp.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
-            
-            if parentClip:
-                surface.set_clip(parentClip)
-            
-            surface.blit(temp, rectangle.topleft)
-        else:
-            
-            for child in self.children:
-                    child.Render(surface, effectiveClip, childOffset)
+            local.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
+            surface.blit(local, rectangle.topleft)
 
-        surface.set_clip(oldClip)
-
-    def HitTest(self, point: Vector2, offset: Optional[Vector2] = None) -> Optional["Element"]:
-        if not self.computedStyle:
+    def HitTest(self, point: Vector2, offset: Vector2 = Vector2(0, 0)) -> Optional["Element"]:
+        if not self.computedStyle or not self.visible:
             return None
-        if not self.visible:
-            return None
+        px, py = point.x - offset.x, point.y - offset.y
         
-        offset = offset if offset is not None else Vector2(0,0)
-        padding = self.computedStyle.padding or BoxSpacing()
+        rectangle = self.rectangle
+        absoluteChildren = []
+        flowChildren = []
+        for child in self.children:
+            if not child.computedStyle:
+                continue
+            if (child.computedStyle.position or "relative") == "absolute":
+                absoluteChildren.append(child)
+            else:
+                flowChildren.append(child)
         
-        rectangle = pygame.Rect(
-            offset.x + self.rectangle.x,
-            offset.y + self.rectangle.y,
-            self.rectangle.width,
-            self.rectangle.height
-        )
-        
-        style = self.computedStyle
-        
-        if style.overflow in ("hidden", "scroll", "scroll-x", "scroll-y"):
-            if not rectangle.collidepoint(point):
-                return None
-        else:
-            if not rectangle.collidepoint(point):
-                return None
-        
-        childOffset = Vector2(
-            rectangle.x - self.scrollOffset.x,
-            rectangle.y - self.scrollOffset.y
-        )
-        
-        for child in reversed(self.children):
-            hit = child.HitTest(point, childOffset)
+        for child in reversed(absoluteChildren):
+            hit = child.HitTest(point)
             if hit:
                 return hit
             
-        return self
+        for child in reversed(flowChildren):
+            hit = child.HitTest(point)
+            if hit:
+                return hit
+        
+        if self.rectangle.collidepoint(px, py):
+            return self
+        
+        return None
     
     def buildPath(self):
         path = []
@@ -411,6 +411,7 @@ class Element:
                 callback(event)
                 if event.immediateStopped:
                     return
+                event.StopPropagation()
                     
         for node in reversed(path[:-1]):
             if event.stopped:

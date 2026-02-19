@@ -176,7 +176,7 @@ class Transform(Component):
     def Up(self) -> Vector3:
         r = self.Right
         f = self.Forward
-        u = f.cross(r)
+        u = r.cross(f)
         if u.length() != 0:
             u.normalize_ip()
         return u

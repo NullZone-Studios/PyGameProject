@@ -10,18 +10,13 @@ class ResolvedStyle(Style):
         states = states or {}
 
         self.ApplyOverride(base)
-        self.ApplyOverride(override)
+        self.ApplyOverride(override, onlyInheritance=False)
         
         for stateName in Style.PSEUDO_FIELDS:
             if states.get(stateName):
-                baseState = getattr(base, stateName, None)
-                if baseState:
-                    self.ApplyOverride(baseState)
-                    
-            if states.get(stateName):
                 overrideState = getattr(override, stateName, None)
                 if overrideState:
-                    self.ApplyOverride(overrideState)
+                    self.ApplyOverride(overrideState, onlyInheritance=False)
                     
         self.ResolveShorthand()
             

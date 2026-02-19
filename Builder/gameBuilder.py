@@ -8,6 +8,7 @@ class GameBuilder:
     BACKGROUND_COLOR: pygame.Color = pygame.Color(0,0,0)
     ICON: pygame.Surface = pygame.image.load("src/images/weird_cat.png")
     TITLE: str = "Game"
+    RUNNING = False
         
     @property
     def World(self) -> list[GameObject]:
@@ -15,3 +16,6 @@ class GameBuilder:
     
     def Build(self):
         pass
+
+    def Quit(self):
+        self.RUNNING = False
