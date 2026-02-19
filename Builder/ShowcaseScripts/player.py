@@ -90,12 +90,16 @@ class Player(Script):
             self.invulnerability_time -= deltaTime
             
     def OnCollisionEnter(self, other):
+        from .gameMaster import GameMaster
+        game_master = GameMaster.CurrentGameMaster
+        if game_master is None or not game_master.is_running:
+            return super().OnCollisionEnter(other)
+
         if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag != "Player" and self.invulnerability_time <= 0:
             self.life -= 1
             self.invulnerability_time = 1.0  # Set invulnerability time to 1 second
             print(f"Player hit! Remaining life: {self.life}")
             if self.life <= 0:
                 print("Player has been destroyed!")
-                from .gameMaster import GameMaster
                 GameMaster.CurrentGameMaster.EndGame()
         return super().OnCollisionEnter(other)
