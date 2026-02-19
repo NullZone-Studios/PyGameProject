@@ -68,9 +68,11 @@ class GameMaster(Script):
         self._spawn_location_keys = tuple(self.spawnLocations.keys())
         self._active_spawn_slots: set[str] = set()
         self.currentScore = 0
+        self.nextLevel : AudioSource = None
 
     def Awake(self) -> None:
         GameMaster.CurrentGameMaster = self
+        self.nextLevel = self.GameObject.GetFirstComponentOfType(AudioSource)
         return super().Awake()
     
     @property
@@ -131,12 +133,9 @@ class GameMaster(Script):
         self.spawnedWaveTurrets.clear()
         self._active_spawn_slots.clear()
         from .player import Player
-        from Components import PolygonRenderer
         player = Player.PlayerObject.GetFirstComponentOfType(Player)
         player.ActivateShooting()
         player.life = 3
-        for renderer in Player.PlayerObject.GetAllComponentsOfType(PolygonRenderer):
-            renderer.Disable()
         self.StartWave()
 
     def Pause(self) -> None:
@@ -152,7 +151,6 @@ class GameMaster(Script):
         self.is_game_over = True
         self.is_paused = False
         from .player import Player
-        from Components import PolygonRenderer
         Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
         for renderer in Player.PlayerObject.GetAllComponentsOfType(PolygonRenderer):
             renderer.Disable()
@@ -173,13 +171,13 @@ class GameMaster(Script):
         self.is_boss_wave = self._ShouldStartBossWave(self.currentWave)
         self.cooldown_before_shooting = self._recalculateShootingCooldown()
 
+        
         if self.is_boss_wave:
             self.StartBossBattle()
         else:
             self.PrepareWaveEnemies()
 
     def EndWave(self) -> None:
-        
         if self.is_boss_wave:
             self.EndBossBattle()
             self.currentScore += int(500 * self.difficulty)  # Bonus for defeating boss wave
@@ -189,7 +187,9 @@ class GameMaster(Script):
             self.normal_waves_completed += 1
 
         self._RecalculateDifficulty()
-            
+        
+        print(f"Current Wave is {self.currentWave} and score is: {self.currentScore}!")
+        self.nextLevel.Play()   
         if self.HasReachedFinalWave():
             self.EndGame()
         else:
