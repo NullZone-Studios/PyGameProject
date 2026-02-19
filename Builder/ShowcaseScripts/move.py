@@ -32,7 +32,7 @@ class Move(Script):
         # inputLayer.AddKeyEvent(pygame.K_c, ButtonState.PRESSED, lambda : self.addY(-self.speed))
         # inputLayer.AddKeyEvent(pygame.K_c, ButtonState.RELEASED, lambda : self.addY(self.speed))
         
-        inputLayer.AddMouseMoveEvent(lambda position: self.HandleMouseMove(position))
+        inputLayer.AddMouseMoveEvent(self.HandleMouseMove)
         
     def Update(self, deltaTime: float):
         transform: Transform = self.GameObject.Transform

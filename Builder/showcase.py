@@ -18,7 +18,7 @@ import Components.UI as UI
 from Builder import GameBuilder
 import pygame
 import numpy as np
-from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player, volumeLabels
+from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, CollisionLogger, GameInputLayer, PositionToLabel, GameMaster, Player, volumeLabels, GameScoreUpdater
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(0,0,0)
@@ -50,7 +50,7 @@ class Showcase(GameBuilder):
         playerObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color("cornflowerblue"), scale=(1,1,1)))
         playerObject.AddComponent(Move(InputHandler))
         playerObject.AddComponent(AudioSource(soundName=f"player_shoot", soundPath="src/sound/shoot_sound2.wav", autoPlay=False))
-        playerObject.AddComponent(Player(InputHandler))
+        player = playerObject.AddComponent(Player(InputHandler))
         gameObjects.append(playerObject)
         
         # ---------- CAMERA ----------
@@ -334,6 +334,40 @@ class Showcase(GameBuilder):
         
         optionsMenuUI.Disable()
         gameObjects.append(optionsMenuUI)
+        
+        inGameUI = GameObject("inGameUI", "Overlay")
+        inGameCanvas: UI.Canvas = inGameUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y))
+        inGameCanvas.root.style = UI.Style(
+            font= pygame.font.SysFont("arial", 36, bold=True),
+            color= pygame.Color("white")
+        )
+        scoreContainer = inGameCanvas.root.AddChild(UI.Element("container"))
+        scoreContainer.style = UI.Style(
+            margin=(10,10),
+            display="flex",
+            flexDirection="row",
+            gap=25
+        )
+        score = scoreContainer.AddChild(UI.Label("score", "SCORE: 9999"))
+        livesLeft = scoreContainer.AddChild(UI.Label("livesLeft", "LIVES LEFT: 3"))
+        wave = scoreContainer.AddChild(UI.Label("wave", "WAVE: 1"))
+        bossLevel = scoreContainer.AddChild(UI.Label("boss", "BOSS LEVEL"))
+        bossLevel.style = UI.Style(
+            color= pygame.Color(255,0,0,255)
+        )
+        score.style = UI.Style(
+            color= pygame.Color("lightgoldenrod")
+        )
+        livesLeft.style = UI.Style(
+            color= pygame.Color("mediumaquamarine")
+        )
+        
+        inGameUI.AddComponent(GameScoreUpdater(score, livesLeft, wave, bossLevel, gm, player))
+        
+        
+        inGameUI.Disable()
+        gameObjects.append(inGameUI)
+        
         
         def ToggleOptionsMenu():
             if optionsMenuUI.Enabled:

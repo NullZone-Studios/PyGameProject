@@ -107,6 +107,15 @@ class GameMaster(Script):
         for obj in self.yet_to_spawn_turrets:
             if not obj._destroyed:
                 obj.Destroy()
+                
+        # Lock mouse and show crosshair show in game UI
+        from Builder.showcase import Showcase
+        
+        pygame.mouse.set_pos(Showcase.RESOLUTION.x/2, Showcase.RESOLUTION.y/2)
+        pygame.mouse.set_relative_mode(True)
+        GameWorld.GetInstance().FindByName("crosshair").Enable()
+        GameWorld.GetInstance().FindByName("inGameUI").Enable()
+        GameWorld.GetInstance().FindByName("StartMenuUI").Disable()
 
         self.is_running = True
         self.is_paused = False
@@ -147,6 +156,13 @@ class GameMaster(Script):
         Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
         for renderer in Player.PlayerObject.GetAllComponentsOfType(PolygonRenderer):
             renderer.Disable()
+        
+        # Unlock mouse and hide crosshair
+        pygame.mouse.set_relative_mode(False)
+        GameWorld.GetInstance().FindByName("crosshair").Disable()
+        GameWorld.GetInstance().FindByName("inGameUI").Disable()
+        GameWorld.GetInstance().FindByName("StartMenuUI").Enable()
+
 
     def StartWave(self) -> None:
         if self.HasReachedFinalWave():
