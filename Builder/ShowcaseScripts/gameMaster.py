@@ -160,7 +160,6 @@ class GameMaster(Script):
             self.PrepareWaveEnemies()
 
     def EndWave(self) -> None:
-        
         if self.is_boss_wave:
             self.EndBossBattle()
             self.currentScore += int(500 * self.difficulty)  # Bonus for defeating boss wave
@@ -171,7 +170,7 @@ class GameMaster(Script):
 
         self._RecalculateDifficulty()
         
-        print(f"Current Wave is {self.currentWave}! and score is: {self.currentScore}!")
+        print(f"Current Wave is {self.currentWave} and score is: {self.currentScore}!")
         self.nextLevel.Play()   
         if self.HasReachedFinalWave():
             self.EndGame()
