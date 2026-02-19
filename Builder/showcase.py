@@ -242,6 +242,7 @@ class Showcase(GameBuilder):
         quitButton.style = buttonStyle
         
         quitButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: self.Quit())
+        startButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: gm.StartGame())
         
         # ------ STAR FIELD ----------
         starBoxObject = GameObject("StarBox", "World")
