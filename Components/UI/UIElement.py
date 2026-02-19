@@ -411,6 +411,7 @@ class Element:
                 callback(event)
                 if event.immediateStopped:
                     return
+                event.StopPropagation()
                     
         for node in reversed(path[:-1]):
             if event.stopped:

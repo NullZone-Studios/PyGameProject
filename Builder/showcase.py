@@ -194,7 +194,7 @@ class Showcase(GameBuilder):
         optionsButton.style = buttonStyle
         quitButton.style = buttonStyle
         
-        quitButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: self.Quit)
+        quitButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: self.Quit())
         
         # ------ STAR FIELD ----------
         starBoxObject = GameObject("StarBox", "World")
@@ -214,6 +214,3 @@ class Showcase(GameBuilder):
         gameObjects.append(starBoxObject)
         
         cameraObject.AddComponent(PositionToLabel(positionLabel))
-        
-    def Quit(self):
-        pygame.quit()
