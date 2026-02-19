@@ -407,9 +407,12 @@ class GameMaster(Script):
         if not self.is_boss_wave:
             surviving_turrets: list[GameObject] = []
             destroyed_count = 0
+            orbit_turrets_destroyed = 0
             for obj in self.spawnedWaveTurrets:
                 if obj._destroyed:
                     destroyed_count += 1
+                    if obj.GetFirstComponentOfType(OrbitTurret) is not None:
+                        orbit_turrets_destroyed += 1
                     if self.GameObject is not None and obj.Parent is self.GameObject:
                         self.GameObject.RemoveChild(obj)
                     spawn_slot = getattr(obj, "_spawn_slot", None)
@@ -417,7 +420,13 @@ class GameMaster(Script):
                         self._active_spawn_slots.discard(spawn_slot)
                 else:
                     surviving_turrets.append(obj)
-            self.currentScore += int(15 * self.difficulty * destroyed_count)
+            self.currentScore += int(20 * self.difficulty * destroyed_count)
+            if orbit_turrets_destroyed > 0:
+                from .player import Player
+                if Player.PlayerObject is not None:
+                    player = Player.PlayerObject.GetFirstComponentOfType(Player)
+                    if player is not None:
+                        player.life = min(10, player.life + orbit_turrets_destroyed)
             self.spawnedWaveTurrets = surviving_turrets
         else:
             obj = self.GameObject.FindChildByName("Boss")
