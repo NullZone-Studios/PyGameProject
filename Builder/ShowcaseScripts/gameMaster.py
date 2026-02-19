@@ -150,10 +150,6 @@ class GameMaster(Script):
         self.is_running = False
         self.is_game_over = True
         self.is_paused = False
-        from .player import Player
-        Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
-        for renderer in Player.PlayerObject.GetAllComponentsOfType(PolygonRenderer):
-            renderer.Disable()
         
         # Unlock mouse and hide crosshair
         pygame.mouse.set_relative_mode(False)
