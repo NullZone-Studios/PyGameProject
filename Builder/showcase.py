@@ -27,6 +27,11 @@ class Showcase(GameBuilder):
     def ToggleMouse(self):
         pygame.mouse.set_pos((self.RESOLUTION.x/2, self.RESOLUTION.y/2))
         pygame.mouse.set_relative_mode(not pygame.mouse.get_relative_mode())
+        crosshairObject = GameWorld.GetInstance().FindByName("crosshair")
+        if crosshairObject.Enabled:
+            crosshairObject.Disable()
+        else:
+            crosshairObject.Enable()
     
     def Build(self, engine):
         gameObjects = engine.world.GameObjects
@@ -127,15 +132,50 @@ class Showcase(GameBuilder):
         gm.StartGame()
         
         # ---------- UI ----------
-        uiObject = GameObject("UI", "Overlay")
-        canvas: UI.Canvas = uiObject.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem=engine.input))
-        positionLabel = canvas.root.AddChild(UI.Label("positionLabel", "position"))
-        positionLabel.style = UI.Style(
-            font=pygame.font.SysFont("arial", 32),
-            padding=5,
-            color=pygame.Color("white")
+        crossHairUI = GameObject("crosshair", "Overlay")
+        canvas: UI.Canvas = crossHairUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem=engine.input))
+        crosshairElement = canvas.root.AddChild(UI.Element("crosshair"))
+        crosshairElement.style = UI.Style(
+            margin=(
+                (self.RESOLUTION.y//4)-5,
+                (self.RESOLUTION.x//4)-5,
+                0,
+                0
+            ),
+            width=20,
+            height=20,
+            borderRadius=20,
+            borderWidth=2,
+            borderColor=pygame.Color("white")
         )
-        gameObjects.append(uiObject)
+        crosshairBeamLeft = crosshairElement.AddChild(UI.Element("beam-left"))
+        crosshairBeamLeft.style = UI.Style(
+            margin=(
+              5,
+              -50,
+              0,
+              0  
+            ),
+            width=80,
+            height=2,
+            background=pygame.Color("white"),
+            borderRadius=20
+        )
+        crosshairBeamRight = crosshairElement.AddChild(UI.Element("beam-right"))
+        crosshairBeamRight.style = UI.Style(
+            margin=(
+              1,
+              19,
+              0,
+              0  
+            ),
+            width=80,
+            height=2,
+            background=pygame.Color("white"),
+            borderRadius=20
+        )
+        
+        gameObjects.append(crossHairUI)
         
         # ---------- START MENU UI ----------
         startMenuUI = GameObject("StartMenuUI", "Overlay")
@@ -213,4 +253,4 @@ class Showcase(GameBuilder):
             child.Transform.Rotate(pitch=np.pi/2)
         gameObjects.append(starBoxObject)
         
-        cameraObject.AddComponent(PositionToLabel(positionLabel))
+        cameraObject.AddComponent(PositionToLabel(crosshairElement))

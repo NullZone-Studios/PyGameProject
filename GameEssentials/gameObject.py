@@ -147,7 +147,7 @@ class GameObject:
         self.Enabled = True
         
         for component in self.Components:
-            if component.Enabled:
+            if not component.Enabled:
                 component.Enable()
             
         for child in self.Children[:]:
