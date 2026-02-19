@@ -169,7 +169,9 @@ class MFOrbitTurret(BaseTurret):
         self._base_flip_chance = 0.30
         self.max_life = 3
         self.current_life = 3
-        self.life : int = None
+        self._shot_timer = 0.0
+        self._next_shot_delay = self.base_fire_interval
+        self._base_projectile_speed = projectile_speed
     
     def Start(self):
         from .gameMaster import GameMaster
@@ -196,12 +198,24 @@ class MFOrbitTurret(BaseTurret):
         self.current_life = self.max_life
 
         self.BasicAIChanger()
-    
-    def BasicAIChanger(self):
+        self._next_shot_delay = self._RollNextShotDelay(difficulty)
+        self._shot_timer = self._next_shot_delay
+
+    def _GetDifficulty(self) -> float:
         from .gameMaster import GameMaster
 
         game_master = GameMaster.CurrentGameMaster
-        difficulty = max(1.0, game_master.difficulty) if game_master is not None else 1.0
+        return max(1.0, game_master.difficulty) if game_master is not None else 1.0
+
+    def _RollNextShotDelay(self, difficulty: float) -> float:
+        # Higher difficulty shoots faster and with less predictable gaps.
+        base_min = max(0.18, self.base_fire_interval / (1.0 + difficulty * 0.35))
+        base_max = max(base_min + 0.05, self.base_fire_interval / (1.0 + difficulty * 0.12))
+        variance = random.uniform(-0.25, 0.25) * (1.0 + difficulty * 0.35)
+        return max(0.12, random.uniform(base_min, base_max) + variance)
+    
+    def BasicAIChanger(self):
+        difficulty = self._GetDifficulty()
 
         # Harder difficulty increases speed ceiling and unpredictability.
         min_speed = max(0.1, self._base_min_speed + (difficulty * 0.08))
@@ -221,6 +235,11 @@ class MFOrbitTurret(BaseTurret):
         base_wait = random.uniform(self._base_change_interval_min, self._base_change_interval_max)
         variance = random.uniform(-0.5, 0.5) * (1.0 + (difficulty * 0.35))
         self._ai_change_timer = max(0.2, base_wait + variance)
+
+        # Harder difficulty makes bullet speed harsher and more erratic.
+        speed_min = max(8.0, self._base_projectile_speed * (0.8 + difficulty * 0.06))
+        speed_max = max(speed_min + 0.5, self._base_projectile_speed * (1.0 + difficulty * 0.18))
+        self.projectile_speed = random.uniform(speed_min, speed_max)
         
     def Update(self, deltaTime: float):
         if not self._shoot_sound:
@@ -232,6 +251,11 @@ class MFOrbitTurret(BaseTurret):
         self._ai_change_timer -= deltaTime
         if self._ai_change_timer <= 0:
             self.BasicAIChanger()
+
+        self._shot_timer -= deltaTime
+        if self._shot_timer <= 0:
+            self.Shoot()
+            self._shot_timer = self._RollNextShotDelay(self._GetDifficulty())
 
         direction = -1.0 if self.orbit_clockwise else 1.0
         self._orbit_angle += direction * self.orbit_angular_speed * deltaTime
@@ -246,6 +270,7 @@ class MFOrbitTurret(BaseTurret):
             self.current_life -= 1
             if self.current_life <= 0:
                 self.GameObject.Destroy()
+                
         
 class OrbitTurret(BaseTurret):
     def __init__(

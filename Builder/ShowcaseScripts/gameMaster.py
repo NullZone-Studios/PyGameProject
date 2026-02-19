@@ -6,7 +6,7 @@ from pygame import Vector3
 from Components.collider import BoxCollider
 from GameEssentials import GameObject, GameWorld
 from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSource
-from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret
+from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret, MFOrbitTurret
 from .collisionLogger import CollisionLogger
 from .rotator import Rotator
 
@@ -258,8 +258,16 @@ class GameMaster(Script):
         self.is_boss_wave = False
 
     def SpawnBoss(self) -> None:
-        # Placeholder hook for boss spawn logic.
-        pass
+        boss = GameObject("Boss", "Boss")
+        boss.AddComponent(BoxCollider(pygame.Vector3(2.5,2.5,2.5)))
+        boss.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Boss"))
+        boss.AddComponent(DebugColliderRenderer())
+        boss.AddComponent(Rotator())
+        boss.AddComponent(ShapeRenderer("Crystal", pygame.color("sienna1"), (2.5,2.5,2.5)))
+        boss.AddComponent(AudioSource(f"spawn_{boss.__hash__()}", "src/sound/spawn_turret.wav"))
+        boss.AddComponent(AudioSource(f"shoot_{boss.__hash__()}", "src/sound/shoot_sound.wav"))
+        boss.AddComponent(MFOrbitTurret(orbit_center=Vector3(0,0,0), orbit_radius=30.0, orbit_angular_speed=0.50, orbit_clockwise=random.choice([True, False])))
+        self.GameObject.AddChild(boss)
 
     def _ShouldStartBossWave(self, waveNumber: int) -> bool:
         if self._IsFinalWave(waveNumber):
@@ -373,20 +381,26 @@ class GameMaster(Script):
         
     
     def Update(self, deltaTime: float) -> None:
-        surviving_turrets: list[GameObject] = []
-        destroyed_count = 0
-        for obj in self.spawnedWaveTurrets:
-            if obj._destroyed:
-                destroyed_count += 1
-                if self.GameObject is not None and obj.Parent is self.GameObject:
-                    self.GameObject.RemoveChild(obj)
-                spawn_slot = getattr(obj, "_spawn_slot", None)
-                if isinstance(spawn_slot, str):
-                    self._active_spawn_slots.discard(spawn_slot)
-            else:
-                surviving_turrets.append(obj)
-        self.currentScore += int(15 * self.difficulty * destroyed_count)
-        self.spawnedWaveTurrets = surviving_turrets
+        if not self.is_boss_wave:
+            surviving_turrets: list[GameObject] = []
+            destroyed_count = 0
+            for obj in self.spawnedWaveTurrets:
+                if obj._destroyed:
+                    destroyed_count += 1
+                    if self.GameObject is not None and obj.Parent is self.GameObject:
+                        self.GameObject.RemoveChild(obj)
+                    spawn_slot = getattr(obj, "_spawn_slot", None)
+                    if isinstance(spawn_slot, str):
+                        self._active_spawn_slots.discard(spawn_slot)
+                else:
+                    surviving_turrets.append(obj)
+            self.currentScore += int(15 * self.difficulty * destroyed_count)
+            self.spawnedWaveTurrets = surviving_turrets
+        else:
+            obj = self.GameObject.FindChildByName("Boss")
+            if obj is not None and obj._destroyed:
+                self.GameObject.RemoveChild(obj)
+                self.boss_alive = False
 
         if not self.is_running or self.is_paused or self.is_game_over:
             return

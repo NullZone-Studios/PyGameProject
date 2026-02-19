@@ -2,7 +2,7 @@ from .rotator import Rotator
 from .move import Move
 from .cat import Cat
 from .collisionLogger import CollisionLogger
-from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret
+from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret, MFOrbitTurret
 from .GameInput import GameInputLayer
 from .positionToLabel import PositionToLabel
 from .gameMaster import GameMaster
@@ -22,4 +22,5 @@ __all__=[
     "BaseTurret",
     "Player",
     "CameraController",
+    "MFOrbitTurret"
 ]
