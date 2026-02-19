@@ -8,6 +8,7 @@ from .positionToLabel import PositionToLabel
 from .gameMaster import GameMaster
 from .player import Player
 from .cameraController import CameraController
+from .gameScoreUpdater import GameScoreUpdater
 
 __all__=[
     "Rotator",
@@ -22,5 +23,6 @@ __all__=[
     "BaseTurret",
     "Player",
     "CameraController",
+    "GameScoreUpdater"
     "MFOrbitTurret"
 ]

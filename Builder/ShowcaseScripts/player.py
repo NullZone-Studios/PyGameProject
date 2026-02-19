@@ -6,6 +6,7 @@ from Components import ShapeRenderer, BoxCollider, AudioSource
 from GameEssentials.Input.buttonState import ButtonState
 from .turretShooter import Projectile
 from GameEssentials import GameObject, GameWorld
+from typing import Optional
 import random
 
 
@@ -25,7 +26,7 @@ class Player(Script):
         self.invulnerability_time = 1.0  # Time remaining for invulnerability after being hit
         self._AudioSource: AudioSource = None
         
-    def Shoot(self):
+    def Shoot(self, position: Optional[pygame.Vector2] = None):
         if self.shoot_cooldown <= 0:
             camera_obj = None
             if GameWorld.GetInstance().MainCamera:
@@ -43,12 +44,12 @@ class Player(Script):
     def ActivateShooting(self):
         self.shootingActivated = not self.shootingActivated
         if self.shootingActivated:
-            self.inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.Shoot())
-            self.inputLayer.AddMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, lambda position: self.Shoot())
+            self.inputLayer.AddKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, self.Shoot)
+            self.inputLayer.AddMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, self.Shoot)
             
         else:
-            self.inputLayer.RemoveKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, lambda : self.Shoot())
-            self.inputLayer.RemoveMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, lambda position: self.Shoot())
+            self.inputLayer.RemoveKeyEvent(pygame.K_SPACE, ButtonState.PRESSED, self.Shoot)
+            self.inputLayer.RemoveMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, self.Shoot)
     
     def Start(self):
         self._AudioSource = self.GameObject.GetFirstComponentOfType(AudioSource)
