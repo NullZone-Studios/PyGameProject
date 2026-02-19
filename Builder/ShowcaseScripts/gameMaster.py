@@ -122,12 +122,9 @@ class GameMaster(Script):
         self.spawnedWaveTurrets.clear()
         self._active_spawn_slots.clear()
         from .player import Player
-        from Components import PolygonRenderer
         player = Player.PlayerObject.GetFirstComponentOfType(Player)
         player.ActivateShooting()
         player.life = 3
-        for renderer in Player.PlayerObject.GetAllComponentsOfType(PolygonRenderer):
-            renderer.Disable()
         self.StartWave()
 
     def Pause(self) -> None:
@@ -143,10 +140,7 @@ class GameMaster(Script):
         self.is_game_over = True
         self.is_paused = False
         from .player import Player
-        from Components import PolygonRenderer
         Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
-        for renderer in Player.PlayerObject.GetAllComponentsOfType(PolygonRenderer):
-            renderer.Disable()
 
     def StartWave(self) -> None:
         if self.HasReachedFinalWave():

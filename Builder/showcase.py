@@ -142,7 +142,7 @@ class Showcase(GameBuilder):
         gm = GameMaster()
         gogm.AddComponent(gm)
         gameObjects.append(gogm)
-        #gm.EasyMode()
+        gm.EasyMode()
         #gm.StartGame()
         
         # ---------- UI ----------
