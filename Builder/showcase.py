@@ -251,6 +251,32 @@ class Showcase(GameBuilder):
         quitButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: self.Quit())
         startButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: gm.StartGame())
         
+        optionsMenuUI = GameObject("optionsUI", "Overlay")
+        optionsCanvas: UI.Canvas = optionsMenuUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem=engine.input))
+        optionsBackButton = optionsCanvas.root.AddChild(UI.Label("backButton", "BACK"))
+        optionsBackButton.style = UI.Style(
+            font = pygame.font.SysFont("arial", 36, bold=True),
+            margin=(20,20),
+            color=pygame.Color("white"),
+            hover=UI.Style(
+                color=pygame.Color("yellow"),
+            )
+        )
+        optionsBackButton.cursor = pygame.cursors.Cursor(pygame.SYSTEM_CURSOR_HAND)
+        optionsMenuUI.Disable()
+        gameObjects.append(optionsMenuUI)
+        
+        def ToggleOptionsMenu():
+            if optionsMenuUI.Enabled:
+                startMenuUI.Enable()
+                optionsMenuUI.Disable()
+            else:
+                startMenuUI.Disable()
+                optionsMenuUI.Enable()
+        
+        optionsButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
+        optionsBackButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: ToggleOptionsMenu())
+        
         # ------ STAR FIELD ----------
         starBoxObject = GameObject("StarBox", "World")
         starBoxObject.Transform.SetScale(pygame.Vector3(10,10,10))

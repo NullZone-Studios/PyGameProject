@@ -13,4 +13,6 @@ class BoxSpacing:
                 return BoxSpacing(value[0], value[1], value[0], value[1])
             elif len(value) == 4:
                 return BoxSpacing(*value)
+        if value is None:
+            return None
         return BoxSpacing()

@@ -60,6 +60,9 @@ class UIInputLayer(InputLayer):
             if element.cursor:
                 mouse.set_cursor(element.cursor)
                 return
+            elif element.style and element.style.cursor:
+                mouse.set_cursor(element.style.cursor)
+                return 
             element = element.parent
         
         mouse.set_cursor(cursors.Cursor(pygame.SYSTEM_CURSOR_ARROW))
