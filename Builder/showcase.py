@@ -258,11 +258,23 @@ class Showcase(GameBuilder):
         for i in range(20):
             starBoxObject.AddChild(starObject.Clone())
         for child in starBoxObject.Children:
-            child.Transform.Position = pygame.Vector3(
-                np.random.uniform(-200,200),
-                np.random.uniform(-200,200),
-                np.random.uniform(-200,200),
-            )
+            
+            if np.random.random() > .5:
+                child.Transform.Translate(x=np.random.randint(80,200))
+            else:
+                child.Transform.Translate(x=np.random.randint(-200,-80))
+            
+            if np.random.random() > .5:
+                child.Transform.Translate(y=np.random.randint(80,200))
+            else:
+                child.Transform.Translate(y=np.random.randint(-200, 80))
+            
+            if np.random.random() > .5:
+                child.Transform.Translate(z=np.random.randint(80,200))
+            else:
+                child.Transform.Translate(z=np.random.randint(-200,-80))
+                
+            
             child.Transform.LookAt(pygame.Vector3(0,0,0))
             child.Transform.Rotate(pitch=np.pi/2)
         gameObjects.append(starBoxObject)
