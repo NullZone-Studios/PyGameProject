@@ -31,3 +31,8 @@ class AudioSource(Component):
             return
         pos = self.GameObject.Transform.WorldPosition
         self.source.set_position((pos.x, pos.y, pos.z))
+        
+    def OnDestroy(self):
+        self.Stop()
+        SoundEngine.GetInstance().UnloadSFX(self.soundName)
+        return super().OnDestroy()

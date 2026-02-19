@@ -20,7 +20,7 @@ from Builder.ShowcaseScripts import Rotator, Move, Cat, CrystalTurret, Collision
 
 class Showcase(GameBuilder):
     BACKGROUND_COLOR = pygame.Color(0,0,0)
-    TITLE = "Showcase "
+    TITLE = "Space Zap 3D"
     RESOLUTION = pygame.Vector2(1280, 720)
     MOUSE_SENSITIVITY = .5
     
@@ -133,8 +133,6 @@ class Showcase(GameBuilder):
         positionLabel.style = UI.Style(
             font=pygame.font.SysFont("arial", 32),
             padding=5,
-            width=200,
-            height=200,
             color=pygame.Color("white")
         )
         gameObjects.append(uiObject)
@@ -144,6 +142,7 @@ class Showcase(GameBuilder):
         gameObjects.append(startMenuUI)
         startMenuCanvas = startMenuUI.AddComponent(UI.Canvas(self.RESOLUTION.x, self.RESOLUTION.y, inputSystem= engine.input))
         panel = startMenuCanvas.root.AddChild(UI.Element("panel"))
+        gameTitle = panel.AddChild(UI.Label("GameTitle", self.TITLE))
         buttonContainer = panel.AddChild(UI.Element("ButtonContainer"))
         startButton = buttonContainer.AddChild(UI.Button("Start"))
         optionsButton = buttonContainer.AddChild(UI.Button("Options"))
@@ -152,7 +151,16 @@ class Showcase(GameBuilder):
         # ------ START UI STYLE ----------
         panelStyle = UI.Style(
             font=pygame.font.SysFont("arial", 28),
-            height=self.RESOLUTION.y
+            height=self.RESOLUTION.y,
+            color=pygame.Color("white"),
+            margin=(self.RESOLUTION.y/4, 20)
+        )
+        
+        gameTitleStyle = UI.Style(
+            font=pygame.font.SysFont("arial", 48, bold=True),
+            textAlign="center",
+            verticalAlign="bottom",
+            margin=(0,0,20,0)
         )
         
         buttonContinerStyle = UI.Style(
@@ -161,7 +169,7 @@ class Showcase(GameBuilder):
             gap=10,
             padding=20,
             background=pygame.Color(200,200,200,50),
-            borderRadius=10,
+            borderRadius=10
         )
         buttonStyle = UI.Style(
             width=200,
@@ -179,6 +187,7 @@ class Showcase(GameBuilder):
         )
         
         panel.style = panelStyle
+        gameTitle.style = gameTitleStyle
         buttonContainer.style = buttonContinerStyle
         startButton.style = buttonStyle
         optionsButton.style = buttonStyle
@@ -195,7 +204,7 @@ class Showcase(GameBuilder):
             child.Transform.Position = pygame.Vector3(
                 np.random.uniform(-200,200),
                 np.random.uniform(-200,200),
-                np.random.uniform(-200,200)
+                np.random.uniform(-200,200),
             )
             child.Transform.LookAt(pygame.Vector3(0,0,0))
             child.Transform.Rotate(pitch=np.pi/2)

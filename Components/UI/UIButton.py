@@ -10,6 +10,7 @@ class Button(Element):
         super().__init__("button")
         label = self.AddChild(Label("buttonLabel", text))
         label.style = Style(
+            font=pygame.font.SysFont("arial", 24),
             textAlign="center",
             verticalAlign="middle"
         )

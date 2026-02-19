@@ -4,6 +4,7 @@ from .Style import BoxSpacing
 
 class Style:
     PSEUDO_FIELDS = ("hover", "active", "focus")
+    INHERITABLE_FIELDS = ("color", "font", "textAlign", "verticalAlign", "cursor", "visibility")
     
     def __init__(
         self,
@@ -69,17 +70,17 @@ class Style:
         self.margin = BoxSpacing.from_value(margin)
         self.cursor = cursor
         
-    def ApplyOverride(self, override: "Style"):
+    def ApplyOverride(self, override: "Style", onlyInheritance: bool = True):
         if not override:
             return
-        
-        overridables = ("color", "font", "textAlign", "verticalAlign", "cursor", "visibility")
         
         for attribute, value in vars(override).items():
             if attribute in Style.PSEUDO_FIELDS:
                 continue
             
-            if value is not None and attribute:
+            if value is not None:
+                if onlyInheritance and attribute not in Style.INHERITABLE_FIELDS:
+                    continue
                 setattr(self, attribute, value)
                 
     def ResolveShorthand(self):

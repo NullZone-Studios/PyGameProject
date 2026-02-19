@@ -2,6 +2,7 @@ import math
 import pygame
 from GameEssentials import GameObject, GameWorld
 from Components import BoxCollider, ShapeRenderer, Script, AudioSource
+import random
 
 
 class Projectile(Script):
@@ -90,7 +91,7 @@ class BaseTurret(Script):
                 owner=self.GameObject,
             )
         )
-        projectile.AddComponent(AudioSource(soundName=f"projectile_{self.__hash__()}", soundPath="src/sound/energy_sound.wav", autoPlay=True, loop=True))
+        projectile.AddComponent(AudioSource(soundName=f"projectile_{self.__hash__()}_{random.randint(1, 1000)}", soundPath="src/sound/energy_sound.wav", autoPlay=True, loop=True))
         GameWorld.GetInstance().Instantiate(projectile)
         projectile.Awake()
         projectile.Start()

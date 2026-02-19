@@ -34,6 +34,13 @@ class SoundEngine:
         self.sounds[name] = source
         source.set_gain(self.sfxVolume * self.masterVolume)
         
+    def UnloadSFX(self, name: str):
+        if name not in self.sounds:
+            return
+        source = self.sounds[name]
+        source.stop()
+        del self.sounds[name]
+        
     def PlaySFX3D(self, name: str, position: Vector3, maxDistance: float = 200):
         if name not in self.sounds:
             print(f"[SoundEngine] Missing SFX: {name}")

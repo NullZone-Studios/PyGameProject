@@ -174,7 +174,7 @@ class Element:
         totalHeight = 0
                     
         for child in children:
-            child.Layout(pygame.Rect(0,0, max(0, availableWidth), 10000), measureOnly=True)
+            child.Layout(pygame.Rect(0,0, max(0, availableWidth), 10000), True)
             margin  = child.computedStyle.margin or BoxSpacing()
             
             totalHeight += child.rectangle.height + margin.top + margin.bottom
@@ -289,6 +289,59 @@ class Element:
         
         rectangle = self.rectangle.move(offset.x, offset.y)
         clipRectangle = rectangle.clip(parentClip) if parentClip else rectangle
+
+        style = self.computedStyle
+        oveflow = style.overflow or "visible"
+        hasRadius = any([
+            style.borderRadiusTopLeft,
+            style.borderRadiusTopRight,
+            style.borderRadiusBottomLeft,
+            style.borderRadiusBottomRight
+        ])
+        needsMask = oveflow in ("hidden", "scroll", "scroll-x", "scroll-y") and hasRadius
+        needsClipRect = oveflow in ("hidden", "scroll", "scroll-x", "scroll-y")
+        needsLocalSurface = needsMask
+        
+        self.Draw(surface, rectangle)
+        
+        flowChildren = []
+        absoluteChildren = []
+        for child in self.children:
+            if not child.computedStyle:
+                continue
+            if (child.computedStyle.position or "relative") == "absolute":
+                absoluteChildren.append(child)
+            else:
+                flowChildren.append(child)
+        
+        if not needsLocalSurface:
+            for child in flowChildren:
+                child.Render(surface, clipRectangle, offset)
+                
+            for child in absoluteChildren:
+                child.Render(surface, clipRectangle, offset)
+        else:
+            local = pygame.Surface((rectangle.width, rectangle.height), pygame.SRCALPHA)
+            childOffset = Vector2(-rectangle.x, -rectangle.y) + offset
+            for child in flowChildren:
+                child.Render(local, None, childOffset)
+            
+            for child in absoluteChildren:
+                child.Render(local, None, childOffset)
+
+            mask = pygame.Surface((rectangle.width, rectangle.height), pygame.SRCALPHA)
+            pygame.draw.rect(
+                mask,
+                (255,255,255),
+                mask.get_rect(),
+                border_top_left_radius=style.borderRadiusTopLeft or 0,
+                border_top_right_radius=style.borderRadiusTopRight or 0,
+                border_bottom_left_radius=style.borderRadiusBottomLeft or 0,
+                border_bottom_right_radius=style.borderRadiusBottomRight or 0,
+            )
+            
+            local.blit(mask, (0,0), special_flags=pygame.BLEND_RGBA_MULT)
+            surface.blit(local, rectangle.topleft)
 
     def HitTest(self, point: Vector2, offset: Vector2 = Vector2(0, 0)) -> Optional["Element"]:
         if not self.computedStyle or not self.visible:
