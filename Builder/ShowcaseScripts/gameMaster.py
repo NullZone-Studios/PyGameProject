@@ -201,8 +201,7 @@ class GameMaster(Script):
 
     def SetWaveLimit(self, final_wave: int) -> None:
         self.final_wave = max(1, final_wave)
-        if self.currentWave > self.final_wave:
-            self.currentWave = self.final_wave
+        self.SetCurrentWave(self.currentWave)
 
     def SetInfiniteWaves(self) -> None:
         self.final_wave = None
@@ -367,21 +366,23 @@ class GameMaster(Script):
         self.time_until_next_enemy_spawn = self._CalculateNextSpawnDelay(self._GetActiveEnemyCount())
 
     def EasyMode(self) -> None:
-        self.starting_difficulty = 1.0
-        self.wave_difficulty_increase = 0.1
-        self.boss_difficulty_increase = 0.2
-        self._RecalculateDifficulty()
+        self._SetDifficultyProfile(1.0, 0.1, 0.2)
         
     def HardMode(self) -> None:  
-        self.starting_difficulty = 2.0
-        self.wave_difficulty_increase = 0.3
-        self.boss_difficulty_increase = 0.5
-        self._RecalculateDifficulty()
+        self._SetDifficultyProfile(2.0, 0.3, 0.5)
         
     def InsaneMode(self) -> None:
-        self.starting_difficulty = 4.0
-        self.wave_difficulty_increase = 0.5
-        self.boss_difficulty_increase = 1.0
+        self._SetDifficultyProfile(4.0, 0.5, 1.0)
+
+    def _SetDifficultyProfile(
+        self,
+        starting_difficulty: float,
+        wave_difficulty_increase: float,
+        boss_difficulty_increase: float,
+    ) -> None:
+        self.starting_difficulty = max(0.0, starting_difficulty)
+        self.wave_difficulty_increase = max(0.0, wave_difficulty_increase)
+        self.boss_difficulty_increase = max(0.0, boss_difficulty_increase)
         self._RecalculateDifficulty()
     
     def _recalculateShootingCooldown(self) -> float:
@@ -428,19 +429,14 @@ class GameMaster(Script):
             return
 
         if self.is_boss_wave:
+            if not self.boss_alive:
+                self.EndWave()
             return
 
         if (len(self.yet_to_spawn_turrets) == 0) and (self._GetActiveEnemyCount() == 0 and not self.boss_alive):
             self.EndWave()
             return
 
-        if not self.yet_to_spawn_turrets:
-            return
-
-        if len(self.spawnedWaveTurrets) == 0 and len(self.yet_to_spawn_turrets) == 0:
-            self.EndWave()
-            return
-        
         self.cooldown_before_shooting -= deltaTime
         if self.cooldown_before_shooting <= 0:
             if not self.currentActiveTurret or self.currentActiveTurret.GameObject._destroyed:

@@ -252,6 +252,8 @@ class MFOrbitTurret(BaseTurret):
         self.projectile_speed = random.uniform(speed_min, speed_max)
         
     def Update(self, deltaTime: float):
+        from .gameMaster import GameMaster
+
         if not self._shoot_sound:
             for comp in self.GameObject.GetAllComponentsOfType(AudioSource):
                 if comp.soundName == f"shoot_{self.GameObject.__hash__()}":
@@ -262,10 +264,13 @@ class MFOrbitTurret(BaseTurret):
         if self._ai_change_timer <= 0:
             self.BasicAIChanger()
 
-        self._shot_timer -= deltaTime
-        if self._shot_timer <= 0:
-            self.Shoot()
-            self._shot_timer = self._RollNextShotDelay(self._GetDifficulty())
+        game_master = GameMaster.CurrentGameMaster
+        can_fire = game_master is None or (game_master.is_running and not game_master.is_game_over)
+        if can_fire:
+            self._shot_timer -= deltaTime
+            if self._shot_timer <= 0:
+                self.Shoot()
+                self._shot_timer = self._RollNextShotDelay(self._GetDifficulty())
 
         direction = -1.0 if self.orbit_clockwise else 1.0
         self._orbit_angle += direction * self.orbit_angular_speed * deltaTime
