@@ -34,5 +34,4 @@ class AudioSource(Component):
         
     def OnDestroy(self):
         self.Stop()
-        SoundEngine.GetInstance().UnloadSFX(self.soundName)
         return super().OnDestroy()

@@ -280,8 +280,8 @@ class GameMaster(Script):
         boss.AddComponent(DebugColliderRenderer())
         boss.AddComponent(Rotator())
         boss.AddComponent(ShapeRenderer("Crystal", pygame.Color("sienna1"), (2.5,2.5,2.5)))
-        boss.AddComponent(AudioSource(f"spawn_{boss.__hash__()}", "src/sound/spawn_turret.wav"))
-        boss.AddComponent(AudioSource(f"shoot_{boss.__hash__()}", "src/sound/shoot_sound.wav"))
+        boss.AddComponent(AudioSource(f"spawn", "src/sound/spawn_turret.wav", autoPlay=True))
+        boss.AddComponent(AudioSource(f"shoot", "src/sound/shoot_sound.wav"))
         boss.AddComponent(MFOrbitTurret(orbit_center=Vector3(0,0,0), orbit_radius=30.0, orbit_angular_speed=0.50, orbit_clockwise=random.choice([True, False])))
         self.GameObject.AddChild(boss)
 
@@ -322,8 +322,8 @@ class GameMaster(Script):
         else:
             turret.AddComponent(CrystalTurret(fire_interval=max(0.5, 5 / max(1.0, self.difficulty))))
             turret.AddComponent(ShapeRenderer(shape="crystal", color=pygame.Color(200, 255, 255)))
-        turret.AddComponent(AudioSource(f"spawn_{turret.__hash__()}", "src/sound/spawn_turret.wav"))
-        turret.AddComponent(AudioSource(f"shoot_{turret.__hash__()}", "src/sound/shoot_sound.wav"))
+        turret.AddComponent(AudioSource(f"spawn", "src/sound/spawn_turret.wav", autoPlay=True))
+        turret.AddComponent(AudioSource(f"shoot", "src/sound/shoot_sound.wav"))
         return turret
 
     def _GetActiveEnemyCount(self) -> int:

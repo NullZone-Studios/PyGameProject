@@ -34,5 +34,4 @@ class MusicSource(Component):
         
     def OnDestroy(self):
         self.Stop()
-        SoundEngine.GetInstance().UnloadMusic(self.soundName)
         return super().OnDestroy()

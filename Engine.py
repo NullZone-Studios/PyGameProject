@@ -9,7 +9,7 @@ class Engine:
         self.game = game
         self.input = Input.InputSystem()
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode(game.RESOLUTION)
+        self.screen = pygame.display.set_mode(game.RESOLUTION, flags=pygame.SCALED, vsync=1)
         pygame.display.set_icon(game.ICON)
         pygame.display.set_caption(game.TITLE)
         self.renderQueue = []
@@ -56,6 +56,6 @@ class Engine:
             # flip() the display to put your work on screen
             pygame.display.flip()
 
-            self.clock.tick(60)  # limits FPS to 60
+            self.clock.tick(120)  # limits FPS to 60
 
         pygame.quit()
