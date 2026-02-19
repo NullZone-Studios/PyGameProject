@@ -277,7 +277,7 @@ class GameMaster(Script):
         boss.AddComponent(CollisionLogger(pygame.Vector3(1, 1, 1), "Boss"))
         boss.AddComponent(DebugColliderRenderer())
         boss.AddComponent(Rotator())
-        boss.AddComponent(ShapeRenderer("Crystal", pygame.color("sienna1"), (2.5,2.5,2.5)))
+        boss.AddComponent(ShapeRenderer("Crystal", pygame.Color("sienna1"), (2.5,2.5,2.5)))
         boss.AddComponent(AudioSource(f"spawn_{boss.__hash__()}", "src/sound/spawn_turret.wav"))
         boss.AddComponent(AudioSource(f"shoot_{boss.__hash__()}", "src/sound/shoot_sound.wav"))
         boss.AddComponent(MFOrbitTurret(orbit_center=Vector3(0,0,0), orbit_radius=30.0, orbit_angular_speed=0.50, orbit_clockwise=random.choice([True, False])))
