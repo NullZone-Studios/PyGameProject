@@ -9,7 +9,7 @@ class Engine:
         self.game = game
         self.input = Input.InputSystem()
         self.clock = pygame.time.Clock()
-        self.screen = pygame.display.set_mode(game.RESOLUTION, flags=pygame.SCALED, vsync=1)
+        self.screen = pygame.display.set_mode(game.RESOLUTION)
         pygame.display.set_icon(game.ICON)
         pygame.display.set_caption(game.TITLE)
         self.renderQueue = []
