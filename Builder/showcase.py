@@ -7,6 +7,7 @@ from Components import (
     PointLight,
     AudioSource,
     AudioListener,
+    MusicSource,
     PolygonRenderer,
     SpriteRenderer,
     Face,
@@ -58,6 +59,12 @@ class Showcase(GameBuilder):
         cameraObject.AddComponent(AudioListener())
         cameraObject.AddComponent(CameraController())
         gameObjects.append(cameraObject)
+        
+        
+        # ---------- Game Ambience ----------
+        backgroundAmbienceObject = cameraObject.AddChild(GameObject("backgroundAmbience", "Music"))
+        backgroundAmbienceObject.Transform.Translate(z=-10)
+        backgroundAmbienceObject.AddComponent(MusicSource("ambience", "src/sound/space_ambience_fixed.wav", autoPlay=True, loop=True))
 
         # ---------- LIGHT ----------
         lightObject = GameObject("Sun", "Light")

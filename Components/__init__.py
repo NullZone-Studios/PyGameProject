@@ -9,6 +9,7 @@ from .directionalLight import DirectionalLight
 from .pointLight import PointLight
 from .audioListener import AudioListener
 from .audioSource import AudioSource
+from .musicSource import MusicSource
 from .script import Script
 from .face import Face
 from .collider import BoxCollider
@@ -29,6 +30,7 @@ __all__=[
     "PointLight",
     "AudioListener",
     "AudioSource",
+    "MusicSource",
     "Script",
     "BoxCollider",
     "DebugColliderRenderer",
