@@ -144,9 +144,9 @@ class Showcase(GameBuilder):
         panel = startMenuCanvas.root.AddChild(UI.Element("panel"))
         gameTitle = panel.AddChild(UI.Label("GameTitle", self.TITLE))
         buttonContainer = panel.AddChild(UI.Element("ButtonContainer"))
-        startButton = buttonContainer.AddChild(UI.Button("Start"))
-        optionsButton = buttonContainer.AddChild(UI.Button("Options"))
-        quitButton = buttonContainer.AddChild(UI.Button("Quit"))
+        startButton: UI.Button = buttonContainer.AddChild(UI.Button("Start"))
+        optionsButton: UI.Button = buttonContainer.AddChild(UI.Button("Options"))
+        quitButton: UI.Button = buttonContainer.AddChild(UI.Button("Quit"))
         
         # ------ START UI STYLE ----------
         panelStyle = UI.Style(
@@ -169,9 +169,10 @@ class Showcase(GameBuilder):
             gap=10,
             padding=20,
             background=pygame.Color(200,200,200,50),
-            borderRadius=10
+            borderRadius=10,
         )
         buttonStyle = UI.Style(
+            font= pygame.font.SysFont("arial", 36, bold=True),
             width=200,
             height=50,
             borderWidth=2,
@@ -193,6 +194,8 @@ class Showcase(GameBuilder):
         optionsButton.style = buttonStyle
         quitButton.style = buttonStyle
         
+        quitButton.AddEventListener(UI.EventType.MOUSE_CLICK, lambda event: self.Quit)
+        
         # ------ STAR FIELD ----------
         starBoxObject = GameObject("StarBox", "World")
         starBoxObject.Transform.SetScale(pygame.Vector3(10,10,10))
@@ -211,3 +214,6 @@ class Showcase(GameBuilder):
         gameObjects.append(starBoxObject)
         
         cameraObject.AddComponent(PositionToLabel(positionLabel))
+        
+    def Quit(self):
+        pygame.quit()
