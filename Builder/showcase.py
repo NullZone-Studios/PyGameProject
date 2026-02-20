@@ -142,6 +142,7 @@ class Showcase(GameBuilder):
         gm = GameMaster()
         gogm.AddComponent(gm)
         gogm.AddComponent(AudioSource("nextWave", "src/sound/level_sound.wav"))
+        gogm.AddComponent(AudioSource("bossWave", "src/sound/boss_spawn.wav"))
         gameObjects.append(gogm)
         gm.NormalMode()
         gm.SetInfiniteWaves()
