@@ -16,6 +16,8 @@ class MusicSource(Component):
             self.Play()
 
     def Play(self):
+        if self.source:
+            return
         transform = self.GameObject.Transform
         self.source = SoundEngine.GetInstance().PlayMusic(self.soundName, transform.WorldPosition)
         if self.loop and self.source:

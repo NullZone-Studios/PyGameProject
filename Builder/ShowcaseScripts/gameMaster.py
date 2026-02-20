@@ -181,6 +181,8 @@ class GameMaster(Script):
         from .player import Player
         Player.PlayerObject.GetFirstComponentOfType(Player).ActivateShooting()
         
+        self.PlayAmbienceMusic()
+        
 
     def StartWave(self) -> None:
         if self.HasReachedFinalWave():
@@ -290,24 +292,15 @@ class GameMaster(Script):
 
     def StartBossBattle(self) -> None:
         self.boss_alive = True
-        musicSources: list[MusicSource] = GameWorld.GetInstance().FindByName("backgroundAmbience").GetAllComponentsOfType(MusicSource)
-        ambience: MusicSource = None
-        bossMusic: MusicSource = None
-        for music in musicSources:
-            if music.soundName == "ambience":
-                ambience = music
-            elif music.soundName == "bossMusic":
-                bossMusic = music
-                
-        ambience.Stop()
-        bossMusic.Play()
-        
+        self.PlayBossMusic()
         self.SpawnBoss()
 
     def EndBossBattle(self) -> None:
         self.boss_alive = False
         self.is_boss_wave = False
+        self.PlayAmbienceMusic()
         
+    def PlayBossMusic(self):
         musicSources: list[MusicSource] = GameWorld.GetInstance().FindByName("backgroundAmbience").GetAllComponentsOfType(MusicSource)
         ambience: MusicSource = None
         bossMusic: MusicSource = None
@@ -316,9 +309,21 @@ class GameMaster(Script):
                 ambience = music
             elif music.soundName == "bossMusic":
                 bossMusic = music
-                
+        bossMusic.Play()
+        ambience.Stop()
+        
+    def PlayAmbienceMusic(self):
+        musicSources: list[MusicSource] = GameWorld.GetInstance().FindByName("backgroundAmbience").GetAllComponentsOfType(MusicSource)
+        ambience: MusicSource = None
+        bossMusic: MusicSource = None
+        for music in musicSources:
+            if music.soundName == "ambience":
+                ambience = music
+            elif music.soundName == "bossMusic":
+                bossMusic = music
         ambience.Play()
         bossMusic.Stop()
+        
 
     def SpawnBoss(self) -> None:
         boss = GameObject("Boss", "Boss")
