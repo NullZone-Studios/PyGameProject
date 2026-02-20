@@ -1,7 +1,7 @@
 import math
 import pygame
 from GameEssentials import GameObject, GameWorld
-from Components import BoxCollider, ShapeRenderer, Script, AudioSource
+from Components import BoxCollider, ShapeRenderer, PolygonRenderer, Script, AudioSource
 import random
 
 class Projectile(Script):
@@ -180,6 +180,8 @@ class MFOrbitTurret(BaseTurret):
         self._shot_timer = 0.0
         self._next_shot_delay = self.base_fire_interval
         self._base_projectile_speed = projectile_speed
+        self._healthy_color = pygame.Color("sienna1")
+        self._danger_color = pygame.Color("crimson")
     
     def Start(self):
         from .gameMaster import GameMaster
@@ -204,6 +206,7 @@ class MFOrbitTurret(BaseTurret):
         max_life = min(10, max(min_life, int(5 + (difficulty - 1.0) * 1.2)))
         self.max_life = random.randint(min_life, max_life)
         self.current_life = self.max_life
+        self._UpdateLifeColor()
 
         self.BasicAIChanger()
         self._next_shot_delay = self._RollNextShotDelay(difficulty)
@@ -285,6 +288,34 @@ class MFOrbitTurret(BaseTurret):
             self.current_life -= 1
             if self.current_life <= 0:
                 self.GameObject.Destroy()
+            else:
+                self._UpdateLifeColor()
+
+    def _UpdateLifeColor(self) -> None:
+        if self.max_life <= 1:
+            t = 1.0 if self.current_life <= 1 else 0.0
+        else:
+            t = 1.0 - ((self.current_life - 1) / (self.max_life - 1))
+        t = max(0.0, min(1.0, t))
+        color = self._LerpColor(self._healthy_color, self._danger_color, t)
+        self._SetVisualColor(color)
+
+    def _SetVisualColor(self, color: pygame.Color) -> None:
+        shape = self.GameObject.GetFirstComponentOfType(ShapeRenderer)
+        if shape is not None:
+            shape.color = pygame.Color(color)
+
+        for child in self.GameObject.Children:
+            for polygon in child.GetAllComponentsOfType(PolygonRenderer):
+                polygon.color = pygame.Color(color)
+
+    def _LerpColor(self, start: pygame.Color, end: pygame.Color, t: float) -> pygame.Color:
+        return pygame.Color(
+            int(start.r + (end.r - start.r) * t),
+            int(start.g + (end.g - start.g) * t),
+            int(start.b + (end.b - start.b) * t),
+            255,
+        )
                 
         
 class OrbitTurret(BaseTurret):
