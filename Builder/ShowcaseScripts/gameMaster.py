@@ -71,6 +71,7 @@ class GameMaster(Script):
         self.currentScore = 0
         self.nextLevel : AudioSource = None
         self.nextBoss :AudioSource = None
+        self.lost :AudioSource = None
         self.player_shoot_cooldown_reset = 1.0
         self.player_shoot_cooldown_min = 0.2
         self.player_shoot_cooldown_boss_multiplier = 0.95
@@ -82,6 +83,8 @@ class GameMaster(Script):
                 self.nextLevel = audio
             if audio.soundName == "bossWave":
                 self.nextBoss = audio
+            if audio.soundName == "lose":
+                self.lost = audio
         return super().Awake()
     
     @property
@@ -159,6 +162,9 @@ class GameMaster(Script):
             self.is_paused = False
 
     def EndGame(self) -> None:
+        if self.lost:
+            self.lost.Play()
+        
         self.is_running = False
         self.is_game_over = True
         self.is_paused = False
