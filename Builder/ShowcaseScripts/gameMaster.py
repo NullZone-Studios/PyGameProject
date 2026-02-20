@@ -374,6 +374,9 @@ class GameMaster(Script):
     def EasyMode(self) -> None:
         self._SetDifficultyProfile(1.0, 0.1, 0.2)
         
+    def NormalMode(self) -> None:
+        self._SetDifficultyProfile(1.0,0.2,0.4)
+        
     def HardMode(self) -> None:  
         self._SetDifficultyProfile(2.0, 0.3, 0.5)
         

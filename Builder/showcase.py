@@ -143,7 +143,7 @@ class Showcase(GameBuilder):
         gogm.AddComponent(gm)
         gogm.AddComponent(AudioSource("nextWave", "src/sound/level_sound.wav"))
         gameObjects.append(gogm)
-        gm.EasyMode()
+        gm.NormalMode()
         gm.SetInfiniteWaves()
         gm.SetInfiniteDifficulty()
         #gm.StartGame()
