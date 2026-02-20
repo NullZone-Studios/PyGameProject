@@ -70,13 +70,21 @@ class GameMaster(Script):
         self._active_spawn_slots: set[str] = set()
         self.currentScore = 0
         self.nextLevel : AudioSource = None
+        self.nextBoss :AudioSource = None
+        self.lost :AudioSource = None
         self.player_shoot_cooldown_reset = 1.0
         self.player_shoot_cooldown_min = 0.2
         self.player_shoot_cooldown_boss_multiplier = 0.95
 
     def Awake(self) -> None:
         GameMaster.CurrentGameMaster = self
-        self.nextLevel = self.GameObject.GetFirstComponentOfType(AudioSource)
+        for audio in self.GameObject.GetAllComponentsOfType(AudioSource):
+            if audio.soundName == "nextWave":
+                self.nextLevel = audio
+            if audio.soundName == "bossWave":
+                self.nextBoss = audio
+            if audio.soundName == "lose":
+                self.lost = audio
         return super().Awake()
     
     @property
@@ -154,6 +162,9 @@ class GameMaster(Script):
             self.is_paused = False
 
     def EndGame(self) -> None:
+        if self.lost:
+            self.lost.Play()
+        
         self.is_running = False
         self.is_game_over = True
         self.is_paused = False
@@ -180,10 +191,11 @@ class GameMaster(Script):
         self.is_boss_wave = self._ShouldStartBossWave(self.currentWave)
         self.cooldown_before_shooting = self._recalculateShootingCooldown()
 
-        
         if self.is_boss_wave:
+            self.nextBoss.Play()
             self.StartBossBattle()
         else:
+            self.nextLevel.Play()
             self.PrepareWaveEnemies()
 
     def EndWave(self) -> None:
@@ -199,7 +211,7 @@ class GameMaster(Script):
         self._RecalculateDifficulty()
         
         print(f"Current Wave is {self.currentWave} and score is: {self.currentScore}!")
-        self.nextLevel.Play()   
+
         if self.HasReachedFinalWave():
             self.EndGame()
         else:

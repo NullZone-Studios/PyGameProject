@@ -50,6 +50,7 @@ class Showcase(GameBuilder):
         playerObject.AddComponent(ShapeRenderer(shape="cube", color=pygame.Color("cornflowerblue"), scale=(1,1,1)))
         playerObject.AddComponent(Move(InputHandler))
         playerObject.AddComponent(AudioSource(soundName=f"player_shoot", soundPath="src/sound/shoot_sound2.wav", autoPlay=False))
+        playerObject.AddComponent(AudioSource("playerHurt","src/sound/hurt_sound.wav"))
         player = playerObject.AddComponent(Player(InputHandler))
         gameObjects.append(playerObject)
         
@@ -142,6 +143,8 @@ class Showcase(GameBuilder):
         gm = GameMaster()
         gogm.AddComponent(gm)
         gogm.AddComponent(AudioSource("nextWave", "src/sound/level_sound.wav"))
+        gogm.AddComponent(AudioSource("bossWave", "src/sound/boss_spawn.wav"))
+        gogm.AddComponent(AudioSource("lose", "src/sound/lose_sound.wav"))
         gameObjects.append(gogm)
         gm.NormalMode()
         gm.SetInfiniteWaves()

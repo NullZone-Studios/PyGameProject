@@ -24,7 +24,8 @@ class Player(Script):
         self.life = 3
         self.shootingActivated = False
         self.invulnerability_time = 1.0  # Time remaining for invulnerability after being hit
-        self._AudioSource: AudioSource = None
+        self._ShootSound: AudioSource = None
+        self._HurtSound: AudioSource = None
         
     def Shoot(self, position: Optional[pygame.Vector2] = None):
         if self.shoot_cooldown <= 0:
@@ -38,8 +39,8 @@ class Player(Script):
             direction = -source_obj.Transform.Forward
             self._spawn_projectile(direction, spawn_origin=source_obj.Transform.WorldPosition)
             self.shoot_cooldown = self.base_shoot_cooldown
-            if self._AudioSource and self._AudioSource.soundName == "player_shoot":
-                self._AudioSource.Play()
+            if self._ShootSound and self._ShootSound.soundName == "player_shoot":
+                self._ShootSound.Play()
     
     def ActivateShooting(self):
         self.shootingActivated = not self.shootingActivated
@@ -52,10 +53,14 @@ class Player(Script):
             self.inputLayer.RemoveMouseButtonEvent(MouseKeys.LEFT, ButtonState.PRESSED, self.Shoot)
     
     def Start(self):
-        self._AudioSource = self.GameObject.GetFirstComponentOfType(AudioSource)
+        for audio in self.GameObject.GetAllComponentsOfType(AudioSource):
+            if audio.soundName == "player_shoot":
+                self._ShootSound = audio
+            if audio.soundName == "playerHurt":
+                self._HurtSound = audio
+        
         Player.PlayerObject = self.GameObject
         return super().Start()
-        
     
     def _spawn_projectile(self, direction: pygame.Vector3, spawn_origin: pygame.Vector3 | None = None):
         projectile = GameObject("CrystalShot", "Projectile")
@@ -96,6 +101,8 @@ class Player(Script):
             return super().OnCollisionEnter(other)
 
         if other.GameObject.Tag == "Projectile" and other.GameObject.GetComponent(Projectile).owner.Tag != "Player" and self.invulnerability_time <= 0:
+            if self._HurtSound:
+                self._HurtSound.Play
             self.life -= 1
             self.invulnerability_time = 1.0  # Set invulnerability time to 1 second
             print(f"Player hit! Remaining life: {self.life}")
