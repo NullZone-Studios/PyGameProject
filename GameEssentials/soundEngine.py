@@ -22,9 +22,7 @@ class SoundEngine:
         self.music: dict[str, Source] = {}
         self.listenerTransform: Optional[Transform] = None
         self.listener: Listener = oalGetListener()
-        self.masterVolume: float = 1.0
-        self.sfxVolume: float = 1.0
-        self.musicVolume: float = 1.0
+        self.masterVolume, self.musicVolume, self.sfxVolume = self.loadSettings()
         
     def SetListenerTransform(self, listenerTransform: Transform):
         self.listenerTransform = listenerTransform
@@ -137,10 +135,32 @@ class SoundEngine:
         for music in self.music:
             source = self.music[music]
             source.set_gain(self.musicVolume * self.masterVolume)
+        self.saveSettings()
     
     def UpdateSound(self):
         for sound in self.sounds:
             pool = self.sounds[sound]
             for entry in pool:
                 entry["source"].set_gain(self.sfxVolume * self.masterVolume)
+        self.saveSettings()
+                
+    def loadSettings(self) -> tuple[int, int]:
+        try:
+            with open("sound_settings.data", "r") as file:
+                lines = file.readlines()
+                settings = {}
+                for line in lines:
+                    key, value = line.strip().split(":")
+                    settings[key] = float(value)
+                return settings.get("master", 0), settings.get("music", 0), settings.get("sfx", 0)
+        except FileNotFoundError:
+            return .5, .5, .5
+        
+    def saveSettings(self):
+        with open("sound_settings.data", "w") as file:
+            file.writelines([
+                f"master:{self.masterVolume}\n",
+                f"music:{self.musicVolume}\n",
+                f"sfx: {self.sfxVolume}\n"
+            ])
     
