@@ -5,7 +5,7 @@ from pygame import Vector3
 
 from Components.collider import BoxCollider
 from GameEssentials import GameObject, GameWorld
-from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSource
+from Components import ShapeRenderer,  DebugColliderRenderer, Script, AudioSource, MusicSource
 from .turretShooter import CrystalTurret, OrbitTurret, BaseTurret, MFOrbitTurret
 from .collisionLogger import CollisionLogger
 from .rotator import Rotator
@@ -290,11 +290,35 @@ class GameMaster(Script):
 
     def StartBossBattle(self) -> None:
         self.boss_alive = True
+        musicSources: list[MusicSource] = GameWorld.GetInstance().FindByName("backgroundAmbience").GetAllComponentsOfType(MusicSource)
+        ambience: MusicSource = None
+        bossMusic: MusicSource = None
+        for music in musicSources:
+            if music.soundName == "ambience":
+                ambience = music
+            elif music.soundName == "bossMusic":
+                bossMusic = music
+                
+        ambience.Stop()
+        bossMusic.Play()
+        
         self.SpawnBoss()
 
     def EndBossBattle(self) -> None:
         self.boss_alive = False
         self.is_boss_wave = False
+        
+        musicSources: list[MusicSource] = GameWorld.GetInstance().FindByName("backgroundAmbience").GetAllComponentsOfType(MusicSource)
+        ambience: MusicSource = None
+        bossMusic: MusicSource = None
+        for music in musicSources:
+            if music.soundName == "ambience":
+                ambience = music
+            elif music.soundName == "bossMusic":
+                bossMusic = music
+                
+        ambience.Play()
+        bossMusic.Stop()
 
     def SpawnBoss(self) -> None:
         boss = GameObject("Boss", "Boss")

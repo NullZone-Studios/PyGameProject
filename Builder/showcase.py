@@ -66,6 +66,7 @@ class Showcase(GameBuilder):
         backgroundAmbienceObject = cameraObject.AddChild(GameObject("backgroundAmbience", "Music"))
         backgroundAmbienceObject.Transform.Translate(z=-10)
         backgroundAmbienceObject.AddComponent(MusicSource("ambience", "src/sound/space_ambience_fixed.wav", autoPlay=True, loop=True))
+        backgroundAmbienceObject.AddComponent(MusicSource("bossMusic", "src/sound/boss_music.wav", loop=True))
 
         # ---------- LIGHT ----------
         lightObject = GameObject("Sun", "Light")
