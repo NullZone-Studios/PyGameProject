@@ -1,5 +1,5 @@
 from pygame import Vector3
-from openal import oalInit, oalQuit, oalOpen, oalGetListener, Listener, Source, AL_PLAYING
+from openal import oalInit, oalQuit, oalOpen, oalGetListener, Listener, Source, AL_PLAYING, alcOpenDevice
 from Components.transform import Transform
 from typing import Optional
 import time
@@ -17,18 +17,34 @@ class SoundEngine:
             raise Exception("SoundEngine is a singleton! Use SoundEngine.GetInstance()")
         SoundEngine.instance = self
         
-        oalInit()
+        self.audio_enabled = self.init_audio()
         self.sounds: dict[str, list[dict]] = {}
         self.music: dict[str, Source] = {}
         self.listenerTransform: Optional[Transform] = None
-        self.listener: Listener = oalGetListener()
+        
+        if self.audio_enabled:
+            self.listener: Listener = oalGetListener()
+            
         self.masterVolume, self.musicVolume, self.sfxVolume = self.loadSettings()
+        
+    def init_audio(self):
+        try:
+            device = alcOpenDevice(None)
+            if not device:
+                raise Exception("No Audio Device")
+            
+            oalInit()
+            print(f"Audio initialized")
+            return True
+        except Exception as e:
+            print(f"Audio disabled:", e)
+            return False
         
     def SetListenerTransform(self, listenerTransform: Transform):
         self.listenerTransform = listenerTransform
         
     def LoadSFX(self, name: str, path: str, poolSize: int = 16):
-        if name in self.sounds :
+        if name in self.sounds or not self.audio_enabled:
             return
         
         self.sounds[name] = []
@@ -41,29 +57,34 @@ class SoundEngine:
             })
         
     def LoadMusic(self, name: str, path: str):
-        if name in self.music:
+        if name in self.music or not self.audio_enabled:
             return
         source = oalOpen(path)
         self.music[name] = source
         source.set_gain(self.musicVolume * self.masterVolume)
         
     def UnloadSFX(self, name: str):
-        if name not in self.sounds:
+        if name not in self.sounds or not self.audio_enabled:
             return
-        source = self.sounds[name]
-        source.stop()
-        source.destroy()
+        
+        for entry in self.sounds[name]:
+            entry["source"].stop()
+            entry["source"].destroy()
+        
         del self.sounds[name]
         
     def UnloadMusic(self, name:str):
-        if name not in self.music:
+        if name not in self.music or not self.audio_enabled:
             return
-        source = self.sounds[name]
+        source = self.music[name]
         source.stop()
         source.destroy()
         del self.music[name]
         
     def PlaySFX3D(self, name: str, position: Vector3, maxDistance: float = 200):
+        if not self.audio_enabled:
+            return None
+        
         if name not in self.sounds:
             print(f"[SoundEngine] Missing SFX: {name}")
             return None
@@ -79,7 +100,7 @@ class SoundEngine:
         oldest = min(pool, key=lambda e: e["startTime"])
         source = oldest["source"]
         source.stop()
-        self.configure_and_play(source, entry, position, maxDistance)
+        self.configure_and_play(source, oldest, position, maxDistance)
     
     def configure_and_play(self, src: Source, entry, position, maxDistance):
         src.set_position((position.x, position.y, position.z))
@@ -93,6 +114,9 @@ class SoundEngine:
 
     
     def PlayMusic(self, name: str, position: Vector3, maxDistance: float = 200):
+        if not self.audio_enabled:
+            return None
+        
         if name not in self.music:
             print(f"[SoundEngine] Mussing Music: {name}")
             return None
@@ -106,7 +130,7 @@ class SoundEngine:
         return source
     
     def UpdateListener(self):
-        if not self.listenerTransform:
+        if not self.listenerTransform or not self.listener or not self.audio_enabled:
             return
         position = self.listenerTransform.WorldPosition
 
@@ -132,12 +156,18 @@ class SoundEngine:
         self.UpdateSound()
         
     def UpdateMusic(self):
+        if not self.audio_enabled:
+            return
+        
         for music in self.music:
             source = self.music[music]
             source.set_gain(self.musicVolume * self.masterVolume)
         self.saveSettings()
     
     def UpdateSound(self):
+        if not self.audio_enabled:
+            return
+        
         for sound in self.sounds:
             pool = self.sounds[sound]
             for entry in pool:
