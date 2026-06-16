@@ -26,5 +26,7 @@ __all__=[
     "CameraController",
     "GameScoreUpdater"
     "MFOrbitTurret",
-    "HighScoreHandler"
+    "HighScoreHandler",
+    "GameScoreUpdater",
+    "MFOrbitTurret"
 ]

@@ -4,7 +4,7 @@ import pygame
 import numpy as np
 
 class PointLight(Light):
-    def __init__(self, color: pygame.Color = pygame.Color(255,255,255), intensity: float = 1.0, range: float =10.0):
+    def __init__(self, color: pygame.Color = pygame.Color(255,255,255), intensity: float = 1.0, range: float = 10.0):
         super().__init__(color, intensity)
         self.range = range
         
